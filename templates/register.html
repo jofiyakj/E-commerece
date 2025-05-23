@@ -6,18 +6,124 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Join GlowCare</title>
     <link rel="stylesheet" href="{% static 'css/register.css' %}">
+    <style>
+        /* Global Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+body {
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to right, #fff7f7, #ffe6f0);
+    padding: 60px 20px; /* Top and bottom space added */
+    display: flex;
+    justify-content: center;
+    overflow-y: auto; /* Enables vertical scroll if content exceeds viewport */
+}
+
+.register-container {
+    background-color: white;
+    padding: 40px 50px;
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+    margin: auto;
+}
+
+
+
+
+        .register-container h1 {
+            font-size: 1.8rem;
+            color: #e75480;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .register-container p {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .register-form p {
+            margin-bottom: 16px;
+        }
+
+        .register-form label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .register-form input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 0.95rem;
+        }
+
+        .register-form ul {
+            padding-left: 20px;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            color: #555;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background-color: #e75480;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-register:hover {
+            background-color: #d64572;
+        }
+
+        .login-link {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .login-link a {
+            color: #e75480;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <div class="register-container">
-    <h1>Join the GlowCare Family</h1>
-    <p>Sign up to unlock exclusive skincare tips, special discounts, and glowing rewards!</p>
-    <form method="post" class="register-form">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn-register">Create Account</button>
-    </form>
-    <p class="login-link">Already part of our glow community? <a href="{% url 'login' %}">Login here</a>
-    </p>
+        <h1>Join the GlowCare Family</h1>
+        <p>Sign up to unlock skincare tips, exclusive discounts, and glowing rewards!</p>
+        <form method="post" class="register-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn-register">Create Account</button>
+        </form>
+        <p class="login-link">
+            Already part of our glow community? <a href="{% url 'login' %}">Login here</a>
+        </p>
     </div>
 </body>
 </html>

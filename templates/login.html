@@ -13,11 +13,12 @@
     <p class="subtitle">Nourish your skin,nourish your soul</p>
 
 
-    <form method="post" class="login-form">
+    <form method="post" style="margin-bottom: 30px;" class="login-form">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Login</button>
     </form> 
+
     <p class="register-link">New to GlowCare? <a href="{% url 'register' %}">Create your account</a>
     </p>
     </div>
