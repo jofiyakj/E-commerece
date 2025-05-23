@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="{% static 'css/contact.css' %}">
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">
+            <a href="/">Glowcare</a>
+        </div>
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="{% url 'user_orders' %}">My Orders</a>
+            <a href="{% url 'view_cart' %}">Cart</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </nav>
+    </header>
+    <div class="container">
+        <h1>Contact Us</h1>
+        <form class="contact-form" action="submit_form.php" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" rows="5" required></textarea>
+
+            <button type="submit">Send Message</button>
+        </form>
+
+        <div class="contact-info">
+            <p><strong>Company Name:</strong>Glowcare Skincare</p>
+            <p><strong>Address:</strong>456 Radiance Blvd,Glow City,USA</p>
+            <p><strong>Email:</strong> support@glowcare.com</p>
+            <p><strong>Phone:</strong> +1 (800) 555-GLOW</p>
+        </div>
+
+    </div>
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>About Us</h4>
+                <p>Glowcare is your destination for natural,dermatologist-approved skincare solutoons that bring out your natural radiance.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'contact' %}">Contact Us</a></li>
+                    <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
+                    <li><a href="/terms">Terms & Conditions</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Customer Care</h4>
+                <p>Email: hello@glowcare.com</p>
+                <p>Phone: 1-800-555-GLOW</p>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Us</h4>
+                <ul>
+                    <li><a href="https://facebook.com/glowcare">Facebook</a></li>
+                    <li><a href="https://twitter.com/glowcare">Twitter</a></li>
+                    <li><a href="https://instagram.com/glowcare">Instagram</a></li>
+                    <li><a href="https://linkedin.com/company/glowcare">LinkedIn</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Glowcare skincare | All Rights Reserved</p>
+        </div>
+    </footer>
+</body>
+</html>

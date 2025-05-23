@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - GlowCare</title>
+    <link rel="stylesheet" href="{% static 'css/user_order.css' %}">
+</head>
+<body>
+    <header>
+        <h1>GlowCare/h1>
+      </div>
+        <nav>
+            <a href="/">Home</a>
+            <a href="{% url 'user_orders' %}">My Orders</a>
+            <a href="{% url 'view_cart' %}">Cart</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </nav>
+    </header>
+    <h1>My Orders</h1>
+    <div class="main">
+    <ul>
+        {% for order in orders %}
+            <li> 
+              
+                
+                <div class="order-status-container">
+                    <h1>Order Status</h1>
+                
+                    <div class="order-summary">
+                        <h2>Order: #{{ order.id }}</h2>
+                        <h3>{{ order.product.name }}</h3>
+                        <h5>Quantity: {{ order.quantity }}</h5>
+                        <p><strong>Status:</strong> In Transit</p>
+                        <p><strong>Expected Delivery:</strong> 30th Jan 2025</p>
+                    </div>
+                
+                    
+                    <div class="status-timeline">
+                        <div class="status-step completed">
+                            <div class="status-circle">1</div>
+                            <p>Order Placed</p>
+                        </div>
+                        <div class="status-step completed">
+                            <div class="status-circle">2</div>
+                            <p>Shipped</p>
+                        </div>
+                        <div class="status-step completed">
+                            <div class="status-circle">3</div>
+                            <p>Out for Delivery</p>
+                        </div>
+                        <div class="status-step current">
+                            <div class="status-circle">4</div>
+                            <p>In Transit</p>
+                        </div>
+                        <div class="status-step">
+                            <div class="status-circle">5</div>
+                            <p>Delivered</p>
+                        </div>
+                    </div>
+                </div>
+                </li>
+        {% endfor %}
+    </ul></div>
+    <footer>
+        <div class="footer-container">
+          <div class="footer-section">
+            <h4>About Us</h4>
+            <p>Glow Care: Your destination for premium skincare solutions crafted with love and science.</p>
+          </div>
+          <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="/home">Home</a></li>
+              <li><a href="/shop">Shop</a></li>
+              <li><a href="/contact">Contact Us</a></li>
+              <li><a href="/privacy-policy">Privacy Policy</a></li>
+              <li><a href="/terms">Terms & Conditions</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Contact Us</h4>
+            <p>Email: support@glowcare.com</p>
+            <p>Phone: 1-800-123-4567</p>
+          </div>
+          <div class="footer-section">
+            <h4>Follow Us</h4>
+            <ul>
+              <li><a href="https://facebook.com/glowcare">Facebook</a></li>
+              <li><a href="https://twitter.com/glowcare">Twitter</a></li>
+              <li><a href="https://instagram.com/glowcare">Instagram</a></li>
+              <li><a href="https://linkedin.com/company/glowcare">LinkedIn</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2025 GlowCare.com | All Rights Reserved</p>
+        </div>
+      </footer>
+</body>
+</html>

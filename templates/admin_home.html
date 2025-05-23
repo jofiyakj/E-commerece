@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Skincare Admin Panel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color:#eaeaea;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #7da27d;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        nav {
+            background: color #9ec8a5;;
+            padding: 15px;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: blod;
+        
+
+        }
+        nav a:hover{
+             text-decoration: underline;
+        }
+        main {
+            padding: 40px;
+            text-align: center;
+        }
+        .welcome {
+            font-size: 26px;
+            color: #4b5e4b;
+            margin-bottom: 10px;
+        }
+        p{
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Glowcare Admin Dashboard</h1>
+    </header>
+
+    <nav>
+        <a href="#">Dashboard</a>
+        <a href="#">Manage Users</a>
+        <a href="#">Orders</a>
+        <a href="#">Customer</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </nav>
+
+    <main>
+        <p class="welcome">Welcome, Glowcare Admin! 👋</p>
+        <p>Use the navigation above to manage skincare products,trak orders,and connect with customers.</p>
+    </main>
+
+</body>
+</html>

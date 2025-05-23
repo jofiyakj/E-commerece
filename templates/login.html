@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlowCare / Login</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="login-container">
+    <h1>Welcome to GlowCare</h1>
+    <p class="subtitle">Nourish your skin,nourish your soul</p>
+
+
+    <form method="post" class="login-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Login</button>
+    </form> 
+    <p class="register-link">New to GlowCare? <a href="{% url 'register' %}">Create your account</a>
+    </p>
+    </div>
+</body>
+</html>  

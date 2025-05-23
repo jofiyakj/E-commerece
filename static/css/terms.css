@@ -1,0 +1,151 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #fffaf9;
+    color: #5c5c5c;
+    margin: 0;
+    padding: 0;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f7d9d9;
+    padding: 15px 30px;
+    color: #d97f7f;
+    box-shadow: 0 2px 8px rgba(249, 204, 204, 0.5);
+}
+
+.navbar h1 {
+    font-size: 26px;
+    color: #d97f7f;
+    font-weight: 700;
+}
+
+.navbar a {
+    color: #d97f7f;
+    text-decoration: none;
+    margin: 0 12px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.navbar a:hover {
+    color: #bf5f5f;
+    text-decoration: underline;
+}
+
+/* Container */
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(249, 204, 204, 0.5);
+}
+
+/* Headings */
+h1 {
+    text-align: center;
+    color: #d97f7f;
+    font-size: 30px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+h2 {
+    color: #bf5f5f;
+    font-size: 24px;
+    border-bottom: 2px solid #f4cccc;
+    padding-bottom: 5px;
+    margin-top: 20px;
+}
+
+/* Lists */
+ul {
+    list-style-type: disc;
+    margin-left: 25px;
+}
+
+li {
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+/* Paragraphs */
+p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: #5c5c5c;
+}
+
+/* Contact Section */
+p strong {
+    color: #bf5f5f;
+}
+
+/* Footer Styles */
+footer {
+    background-color: #f7d9d9;
+    color: #5c5c5c;
+    padding: 40px 30px;
+    margin-top: 50px;
+    font-family: 'Poppins', sans-serif;
+    height: 400px;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.footer-section {
+    flex: 1;
+    margin: 0 20px;
+    min-width: 250px;
+}
+
+.footer-section h4 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #d97f7f;
+}
+
+.footer-section p, .footer-section ul {
+    font-size: 14px;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin: 6px 0;
+}
+
+.footer-section ul li a {
+    color: #d97f7f;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-section ul li a:hover {
+    color: #bf5f5f;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 14px;
+}
+
+.footer-bottom p {
+    margin: 0;
+}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join GlowCare</title>
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+</head>
+<body>
+    <div class="register-container">
+    <h1>Join the GlowCare Family</h1>
+    <p>Sign up to unlock exclusive skincare tips, special discounts, and glowing rewards!</p>
+    <form method="post" class="register-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-register">Create Account</button>
+    </form>
+    <p class="login-link">Already part of our glow community? <a href="{% url 'login' %}">Login here</a>
+    </p>
+    </div>
+</body>
+</html>

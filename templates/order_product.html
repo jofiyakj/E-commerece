@@ -1,0 +1,93 @@
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlowCare - Product Order</title>
+    <link rel="stylesheet" href="{% static 'css/order_product.css' %}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="navbar">
+        <h1 class="logo">GlowCare</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="{% url 'user_orders' %}">My Orders</a>
+            <a href="{% url 'view_cart' %}">Cart</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </nav>
+    </header>
+
+    <div class="main-container">
+        <div class="product-section">
+            <div class="product-image">
+                {% if product.image %}
+                    <img src="" alt="">
+                {% else %}
+                    <p>No image available.</p>
+                {% endif %}
+            </div>
+
+            <div class="product-details">
+                <h1>{{ product.name }}</h1>
+                <p class="price"><strong>Price:</strong> ₹{{ product.price }}</p>
+                <p class="stock"><strong>Stock:</strong> {{ product.stock }}</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" name="quantity" min="1" required>
+                    <button type="submit" class="buy-now">Add to cart</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="product-offers">
+            <h3>Special Offers</h3>
+            <ul>
+                <li>Buy 2 Get 1 Free on select skincare products </li>
+                <li>Get a free GlowCareTravel Kit on orders above 2000/- </li>
+                <li>10% instant discount with GlowCare Membership </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-container">
+        <div class="footer-section">
+          <h4>About GlowCare</h4>
+          <p>Your ultimate destination for radiants and healthy skin.Explore our range of natural skincare products.</p>
+        </div>
+        <div class="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/shop">Shop</a></li>
+            <li><a href="/contact">Contact Us</a></li>
+            <li><a href="/privacy-policy">Privacy Policy</a></li>
+            <li><a href="/terms">Terms & Conditions</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h4>Contact Us</h4>
+          <p>Email: support@glowcare.com</p>
+          <p>Phone: 1-800-123-4567</p>
+        </div>
+        <div class="footer-section">
+          <h4>Follow Us</h4>
+          <ul>
+            <li><a href="https://facebook.com/glowcare">Facebook</a></li>
+            <li><a href="https://twitter.com/glowcare">Twitter</a></li>
+            <li><a href="https://instagram.com/glowcare">Instagram</a></li>
+            <li><a href="https://linkedin.com/company/glowcare">LinkedIn</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2025 GlowCare | All Rights Reserved</p>
+      </div>
+    </footer>
+</body>
+</html>
