@@ -71,6 +71,73 @@ def order_product(request, product_id):
         return redirect('order_detail', order_id=order.id)
     return render(request, 'order_product.html', {'product': product})
 
+#NEW SINGLE ORDER VIEW
+from .models import Order, OrderItem  # Ensure OrderItem is imported
+
+@login_required(login_url='login')
+def order_product(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    if request.method == 'POST':
+        quantity = int(request.POST['quantity'])
+
+        # Create a new Order
+        order = Order.objects.create(user=request.user)
+
+        # Create a single OrderItem for the product
+        OrderItem.objects.create(
+            order=order,
+            product=product,
+            quantity=quantity
+        )
+
+        # Optionally update product stock
+        product.stock -= quantity
+        product.save()
+
+        return redirect('order_detail', order_id=order.id)
+
+    return render(request, 'order_product.html', {'product': product})
+
+
+
+#NEW CART TO ORDER VIEW
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from django.http import HttpResponse
+from .models import Cart, Order, OrderItem
+
+@login_required(login_url='login')
+def cart_to_order(request):
+    cart = get_object_or_404(Cart, user=request.user)
+    cart_items = cart.items.all()
+
+    if not cart_items.exists():
+        return HttpResponse("Your cart is empty.")
+
+    # Create a new Order
+    order = Order.objects.create(user=request.user)
+
+    # Create OrderItems from CartItems
+    for item in cart_items:
+        OrderItem.objects.create(
+            order=order,
+            product=item.product,
+            quantity=item.quantity
+        )
+
+        # Optionally decrease product stock
+        item.product.stock -= item.quantity
+        item.product.save()
+
+    # Clear cart
+    cart.items.all().delete()
+
+    return redirect('order_detail', order_id=order.id)  # Replace with your order detail URL name
+
+
+
 @login_required(login_url='login')  # Ensure user is logged in before proceeding
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)

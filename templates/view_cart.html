@@ -44,11 +44,18 @@
                               <input type="number" name="quantity" value="{{ item.quantity }}" min="1">
                               <button type="submit">Update Quantity</button>
                           </form>
-                          
+
+
                         </li>
                     {% endfor %}
                 </ul>
+                
                 <h4>Total Price: ₹{{ total_price }}</h4>
+                                          
+                          <form action="{% url 'cart_to_order' %}" method="post">
+    {% csrf_token %}
+    <button type="submit" >Place Order</button>
+</form>
             {% else %}
                 <p>Your cart is empty.Explore our skincare essentials and glow like never before!</p>
             {% endif %}
