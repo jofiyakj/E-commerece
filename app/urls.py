@@ -20,11 +20,10 @@ urlpatterns = [
     # Remove item from cart, only accessible if logged in
     path('cart/remove/<int:product_id>/', views.remove_from_cart, name='remove_from_cart'),
     # Update quantity in cart, only accessible if logged in
-    path('cart/update/<int:product_id>/<int:quantity>/', views.update_quantity, name='update_quantity'),
     path('terms', views.terms, name='terms'),
     path('privacy/', views.privacy, name='privacy'),
     path('contact/', views.contact, name='contact'),
     path('search/', views.search_products, name='search_products'),
-    path('cart/update/<int:product_id>/<int:quantity>/', views.update_quantity, name='update_quantity'),
+    path('cart/update/<int:product_id>/', views.update_quantity, name='update_quantity')
 
 ]

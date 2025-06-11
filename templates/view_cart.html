@@ -39,11 +39,12 @@
                             <a href="{% url 'remove_from_cart' item.product.id %}">
                                 <button>Remove</button>
                             </a>
-                            <form action="{% url 'update_quantity' item.product.id item.quantity %}" method="post" style="display:inline;">
-                              {% csrf_token %}
-                              <input type="number" name="quantity" value="{{ item.quantity }}" min="1">
-                              <button type="submit">Update Quantity</button>
-                          </form>
+<form action="{% url 'update_quantity' item.product.id %}" method="post" style="display:inline;">
+    {% csrf_token %}
+    <input type="number" name="quantity" value="{{ item.quantity }}" min="1">
+    <button type="submit">Update Quantity</button>
+</form>
+
 
 
                         </li>

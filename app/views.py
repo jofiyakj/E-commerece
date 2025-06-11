@@ -4,6 +4,12 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from .models import *
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.http import HttpResponse
+
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -12,6 +18,8 @@ def admin_home_view(request):
 
 def admin_home(request):
     return render(request, 'admin_home.html')
+
+
 def category_list(request):
     categories = Product.objects.values_list('category', flat=True).distinct()
     return render(request, 'category_list.html', {'categories': categories})
@@ -103,12 +111,10 @@ def order_product(request, product_id):
 
 #NEW CART TO ORDER VIEW
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect
-from django.http import HttpResponse
-from .models import Cart, Order, OrderItem
+
 
 @login_required(login_url='login')
+
 def cart_to_order(request):
     cart = get_object_or_404(Cart, user=request.user)
     cart_items = cart.items.all()
@@ -116,25 +122,49 @@ def cart_to_order(request):
     if not cart_items.exists():
         return HttpResponse("Your cart is empty.")
 
+
+    print("Checking",request.user)
     # Create a new Order
     order = Order.objects.create(user=request.user)
 
     # Create OrderItems from CartItems
+    order_summary = ""
     for item in cart_items:
-        OrderItem.objects.create(
-            order=order,
-            product=item.product,
-            quantity=item.quantity
-        )
+        if item.product.stock < item.quantity:
+            messages.error(
+                request,
+                f"Insufficient stock for {item.product.name}. Available: {item.product.stock}, Requested: {item.quantity}"
+            )
+            return redirect('cart_view')
+        else:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity
+            )
+            print("Checking",item.product.name)
+            print("Checking",item.quantity)
+            print("Checking",item.product.stock)
+            # Optionally decrease product stock
+            item.product.stock -= item.quantity
+            item.product.save()
 
-        # Optionally decrease product stock
-        item.product.stock -= item.quantity
-        item.product.save()
+            # Build summary
+            order_summary += f"{item.product.name} - {item.quantity}\n"
 
     # Clear cart
     cart.items.all().delete()
 
-    return redirect('order_detail', order_id=order.id)  # Replace with your order detail URL name
+    # Send confirmation email
+    send_mail(
+        subject='Your Order Confirmation',
+        message=f"Hi {request.user},\n\nThank you for your order!\n\nOrder ID: {order.id}\nItems:\n{order_summary}",
+        from_email='tsgjr2126@gmail.com',
+        recipient_list=[request.user],
+        fail_silently=False,
+    )
+
+    return redirect('order_detail', order_id=order.id)
 
 
 
@@ -173,30 +203,21 @@ def remove_from_cart(request, product_id):
     cart_item.delete()
     return redirect('view_cart')
 
-@login_required(login_url='login')  # Ensure user is logged in before proceeding
+@login_required(login_url='login')
 def update_quantity(request, product_id):
     if request.method == "POST":
         new_quantity = int(request.POST.get("quantity", 1))
         cart = get_object_or_404(Cart, user=request.user)
         cart_item = get_object_or_404(CartItem, cart=cart, product_id=product_id)
+
         if new_quantity > 0:
             cart_item.quantity = new_quantity
             cart_item.save()
         else:
             cart_item.delete()
+
     return redirect('view_cart')
-@login_required(login_url='login') 
-def update_quantity(request, product_id, quantity):
-    if request.method == "POST":
-        cart = get_object_or_404(Cart, user=request.user)
-        cart_item = get_object_or_404(CartItem, cart=cart, product_id=product_id)
-        if quantity > 0:
-            cart_item.quantity = quantity
-            cart_item.save()
-        else:
-            cart_item.delete()
-    
-    return redirect('view_cart')
+
 
 
 def terms(request):

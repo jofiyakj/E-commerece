@@ -17,11 +17,25 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+from decouple import config
+
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-1(5^=t*b+1k(id7zvm4(+@yhd-oxzz18m$-f$_nqi-b6ahxxi)'
+# SECRET_KEY = 'django-insecure-1(5^=t*b+1k(id7zvm4(+@yhd-oxzz18m$-f$_nqi-b6ahxxi)'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
