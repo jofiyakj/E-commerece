@@ -27,11 +27,22 @@ def category_list(request):
 
 def home(request):
     query = request.GET.get('query')
+    
     if query:
+        # Check for exact match (case-insensitive)
+        exact_matches = Product.objects.filter(name__iexact=query)
+        
+        if exact_matches.count() == 1:
+            # Redirect to the product detail page
+            return redirect('product_detail', product_id=exact_matches.first().id)
+        
+        # Else show partial matches
         products = Product.objects.filter(name__icontains=query)
     else:
         products = Product.objects.all()
+        
     return render(request, 'home.html', {'products': products})
+
 
 
 def product_detail(request, product_id):
