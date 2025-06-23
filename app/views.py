@@ -314,6 +314,8 @@ def reset_password(request):
 
     return render(request, 'reset_password.html')
 
+
+
 @login_required(login_url='login')  # Ensure user is logged in before proceeding
 def order_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -367,6 +369,181 @@ def profile_view(request):
         'action': 'Edit',
     }
     return render(request, 'profile.html', context)
+
+
+@login_required
+def add_address(request):
+    if request.method == 'POST':
+        name = request.POST.get('name', '')
+        address = request.POST.get('address', '')
+        pincode = request.POST.get('pincode', '')
+        phone = request.POST.get('phone', '')
+
+        errors = {}
+        if not name:
+            errors['name'] = 'Name is required.'
+        if not address:
+            errors['address'] = 'Address is required.'
+        if not pincode:
+            errors['pincode'] = 'Pincode is required.'
+        if not phone:
+            errors['phone'] = 'Phone number is required.'
+
+        if not errors:
+            Address.objects.create(
+                user=request.user,
+                name=name,
+                address=address,
+                pincode=pincode,
+                phone=phone
+            )
+            messages.success(request, 'Address added successfully!')
+            return redirect('profile')
+        else:
+            return render(request, 'address_form.html', {
+                'errors': errors,
+                'name': name,
+                'address': address,
+                'pincode': pincode,
+                'phone': phone,
+                'action': 'Add'
+            })
+
+    return render(request, 'address_form.html', {
+        'action': 'Add',
+        'name': '',
+        'address': '',
+        'pincode': '',
+        'phone': '',
+        'errors': {}
+    })
+
+@login_required
+def edit_address(request, address_id):
+    address_obj = get_object_or_404(Address, id=address_id, user=request.user)
+
+    if request.method == 'POST':
+        name = request.POST.get('name', '')
+        address = request.POST.get('address', '')
+        pincode = request.POST.get('pincode', '')
+        phone = request.POST.get('phone', '')
+
+        errors = {}
+        if not name:
+            errors['name'] = 'Name is required.'
+        if not address:
+            errors['address'] = 'Address is required.'
+        if not pincode:
+            errors['pincode'] = 'Pincode is required.'
+        if not phone:
+            errors['phone'] = 'Phone number is required.'
+
+        if not errors:
+            address_obj.name = name
+            address_obj.address = address
+            address_obj.pincode = pincode
+            address_obj.phone = phone
+            address_obj.save()
+            messages.success(request, 'Address updated successfully!')
+            return redirect('profile')
+        else:
+            return render(request, 'address_form.html', {
+                'errors': errors,
+                'name': name,
+                'address': address,
+                'pincode': pincode,
+                'phone': phone,
+                'action': 'Edit'
+            })
+
+    return render(request, 'address_form.html', {
+        'name': address_obj.name,
+        'address': address_obj.address,
+        'pincode': address_obj.pincode,
+        'phone': address_obj.phone,
+        'action': 'Edit',
+        'errors': {}
+    })
+
+@login_required
+def delete_address(request, address_id):
+    address_obj = get_object_or_404(Address, id=address_id, user=request.user)
+    address_obj.delete()
+    messages.success(request, 'Address deleted successfully!')
+    return redirect('profile')
+
+
+@login_required
+def edit_email(request):
+    """View to edit user's email"""
+    user = request.user
+    
+    if request.method == 'POST':
+        email = request.POST.get('email', '')
+        
+        # Basic validation
+        errors = {}
+        if not email:
+            errors['email'] = 'Email is required.'
+        elif '@' not in email:
+            errors['email'] = 'Please enter a valid email address.'
+            
+        if not errors:
+            # Update email
+            user.email = email
+            user.save()
+            messages.success(request, 'Email updated successfully!')
+            return redirect('profile')
+        else:
+            # If there are errors, pass them to the template
+            return render(request, 'email.html', {
+                'errors': errors,
+                'email': email
+            })
+    
+    
+    return render(request, 'email.html', {
+        'email': user.email
+    })
+
+
+
+@login_required
+def edit_username(request):
+    """View to edit user's username"""
+    user = request.user
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', '')
+        
+        # Basic validation
+        errors = {}
+        if not username:
+            errors['username'] = 'Username is required.'
+        elif len(username) < 4:
+            errors['username'] = 'Username should be at least 4 characters long.'
+        elif User.objects.filter(username=username).exists():
+            errors['username'] = 'This username is already taken.'
+            
+        if not errors:
+            # Update username
+            user.username = username
+            user.save()
+            messages.success(request, 'Username updated successfully!')
+            return redirect('profile')
+        else:
+            # If there are errors, pass them to the template
+            return render(request, 'username.html', {
+                'errors': errors,
+                'username': username
+            })
+    
+    # Pre-fill form with existing username
+    return render(request, 'username.html', {
+        'username': user.username
+    }) 
+
+
 
 @login_required(login_url='login')
 def order_product(request, product_id):
@@ -499,6 +676,35 @@ def cancel_order(request, order_id):
             messages.success(request, f"Order #{order.id} has been cancelled.")
     
     return redirect('profile')
+
+def order_success(request):
+    order = Order.objects.filter(user=request.user).order_by('-created_at').first()
+    if not order:
+        messages.error(request, 'No recent order found.')
+        return redirect('index')
+    return render(request, 'order_success.html', {'order': order})
+
+
+@login_required
+def return_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    
+    if request.method == 'POST':
+        # Check if the order is in 'Delivered' status and within 7 days
+        if order.status == 'Delivered':
+            order_age = timezone.now() - order.created_at
+            if order_age.days <= 7:
+                order.status = 'Returned'
+                order.save()
+                messages.success(request, f"Order #{order.id} has been marked for return.")
+            else:
+                messages.error(request, "Return period has expired (7 days).")
+        else:
+            messages.error(request, "Only delivered orders can be returned.")
+        return redirect('profile')
+    
+    return redirect('profile')
+
 
 @login_required(login_url='login')  # Ensure user is logged in before proceeding
 def user_orders(request):
