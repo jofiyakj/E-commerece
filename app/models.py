@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 
 
@@ -90,10 +91,29 @@ class Address(models.Model):
         return f"{self.name} - {self.address[:30]}"
     
 
+from django.db import models
+from django.contrib.auth.models import User
+
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('Ordered', 'Ordered'),
+        ('Confirmed', 'Confirmed'),
+        ('Packed', 'Packed'),
+        ('Shipped', 'Shipped'),
+        ('Delivered', 'Delivered'),
+        ('Cancelled', 'Cancelled'),
+        ('Returned', 'Returned'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     ordered_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=100, default="Pending")
+    name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=15)
+    pincode = models.CharField(max_length=10)
+    address = models.TextField()
+
+    # FIX: use choices and set default from the choices
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Ordered')
 
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
@@ -101,9 +121,10 @@ class Order(models.Model):
     def get_total_price(self):
         return sum(item.get_total_price() for item in self.items.all())
 
+
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey('Product', on_delete=models.CASCADE)  # make sure Product model exists
     quantity = models.IntegerField()
 
     def __str__(self):
@@ -111,6 +132,7 @@ class OrderItem(models.Model):
 
     def get_total_price(self):
         return self.product.price * self.quantity
+
     
 
 class UserExtension(models.Model):
