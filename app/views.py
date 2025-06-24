@@ -14,11 +14,13 @@ from .models import Product, Cart, CartItem, Order, OrderItem, UserProfile, Addr
 import json
 import pandas as pd
 import re
+import random
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from datetime import datetime, timedelta
 from django.utils import timezone
-
+import razorpay
+from django.conf import settings
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
@@ -174,6 +176,7 @@ def product_detail(request, product_id):
     })
 
 
+
 def is_valid_password(password):
     return (
         len(password) >= 8 and
@@ -191,36 +194,44 @@ def is_valid_password(password):
 #     else:
 #         form = UserCreationForm()
 #     return render(request, 'register.html', {'form': form})
+
+
+
+
+
+
+
+
 def register_view(request):
     if request.method == 'POST':
-        username = request.POST['username'].strip()
-        email = request.POST['email'].strip()
-        password = request.POST['password']
-        confpassword = request.POST['confpassword']
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        confpassword = request.POST.get('confpassword', '')
 
-        # Check if passwords match
+        # Basic validation
+        if not username or not email or not password or not confpassword:
+            messages.error(request, "All fields are required.")
+            return redirect('register')
+
         if password != confpassword:
             messages.error(request, "Passwords do not match.")
             return redirect('register')
 
-        # Validate email format
         try:
             validate_email(email)
         except ValidationError:
             messages.error(request, "Invalid email format.")
             return redirect('register')
 
-        # Check if username already exists
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username already exists.")
             return redirect('register')
 
-        # Check if email already exists
         if User.objects.filter(email=email).exists():
             messages.error(request, "Email already in use.")
             return redirect('register')
 
-        # Validate password strength
         if not is_valid_password(password):
             messages.error(
                 request,
@@ -228,21 +239,29 @@ def register_view(request):
             )
             return redirect('register')
 
-        # Create user
+        # Create user and profile
         user = User.objects.create_user(username=username, email=email, password=password)
         user.save()
 
         user_profile = users.objects.create(user=user)
+
+        # Safely generate and assign vector data
         user_vector = combine_user_with_search_and_views(user_profile)
-        user_profile.vector_data = json.dumps(user_vector.tolist())
-        user_profile.save()
+        if user_vector is not None:
+            try:
+                user_profile.vector_data = json.dumps(user_vector.tolist())
+                user_profile.save()
+            except Exception as e:
+                messages.warning(request, f"User registered, but vector data save failed: {e}")
+        else:
+            messages.warning(request, "User registered, but no vector data was generated.")
 
         messages.success(request, "Registration successful. Please login.")
         return redirect('login')
 
-    # Clear messages for GET request
     messages.get_messages(request).used = True
     return render(request, 'register.html')
+
 
 
 
@@ -768,3 +787,30 @@ def search_products(request):
     return render(request, 'search_results.html', {'products': products, 'query': query})
 
 
+
+@login_required
+def initiate_payment(request):
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+    amount = 50000  # Amount in paise (₹500.00)
+    currency = 'INR'
+
+    payment = client.order.create({
+        'amount': amount,
+        'currency': currency,
+        'payment_capture': 1
+    })
+
+    context = {
+        'payment': payment,
+        'key_id': settings.RAZORPAY_KEY_ID,
+        'amount': amount,
+        'user': request.user
+    }
+    return render(request, 'payment.html', context)
+
+def payment_success(request):
+    payment_id = request.GET.get('payment_id')
+    # Optionally verify payment with Razorpay API
+    # Save order/payment in DB
+    return render(request, 'payment_success.html', {'payment_id': payment_id})

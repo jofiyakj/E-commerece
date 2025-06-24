@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path('admin-home/', views.admin_home, name='admin_home'),
-    path('', views.home, name='home'),
+    path('home/', views.home, name='home'),
     path('product/<int:product_id>/', views.product_detail, name='product_detail'),
     path('register/', views.register_view, name='register'),
     path('forgot-password/', views.forgot_password_view, name='forgot_password'),
@@ -11,7 +11,7 @@ urlpatterns = [
     path('reset-password/', views.reset_password, name='reset_password'),
     path('checkout/', views.cart_to_order, name='cart_to_order'),
 
-    path('login/', views.login_view, name='login'),
+    path('', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
     path('profile/edit-email/', views.edit_email, name='edit_email'),
@@ -36,6 +36,8 @@ urlpatterns = [
     path('privacy/', views.privacy, name='privacy'),
     path('contact/', views.contact, name='contact'),
     path('search/', views.search_products, name='search_products'),
-    path('cart/update/<int:product_id>/', views.update_quantity, name='update_quantity')
+    path('cart/update/<int:product_id>/', views.update_quantity, name='update_quantity'),
+    path('pay/', views.initiate_payment, name='initiate_payment'),
+    path('payment-success/', views.payment_success, name='payment_success'),
 
 ]
