@@ -1,0 +1,137 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookings -GlowCare </title>
+    <link rel="stylesheet" href="{% static 'css/bookings.css' %}">
+</head>
+<body>
+    <header class="top-bar">
+        <button class="menu-toggle">☰</button>
+        <h1 class="brand">VAULTGUARD</h1>
+    </header>
+
+    <div class="overlay"></div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <button class="close-sidebar">✕</button>
+        </div><br><br>
+        <nav class="sidebar-nav">
+            <a href="{% url 'firstpage' %}">Home</a>
+            <a href="{% url 'add_product' %}">Add Product</a>
+            <a href="{% url 'admin_bookings' %}" class="active">Bookings</a>
+            <a href="{% url 'user_list' %}">User List</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <section class="section-title">All Orders</section>
+
+        {% if messages %}
+        <div class="message-container">
+            {% for message in messages %}
+            <div class="message message-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="table-wrapper">
+            <table class="order-table">
+                <thead>
+                    <tr>
+                        <th data-label="ID">ID</th>
+                        <th data-label="User">User</th>
+                        <th data-label="Payment" class="hide-mobile">Payment</th>
+                        <th data-label="Total">Total</th>
+                        <th data-label="Delivery" class="hide-mobile">Delivery</th>
+                        <th data-label="Products">Products</th>
+                        <th data-label="Status">Status</th>
+                        <th data-label="Action">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td data-label="ID">{{ order.id }}</td>
+                        <td data-label="User">{{ order.user.username }}</td>
+                        <td data-label="Payment" class="hide-mobile">{{ order.payment_method|title }}</td>
+                        <td data-label="Total">₹{{ order.total_price }}</td>
+                        <td data-label="Delivery" class="hide-mobile">
+                            <small class="text-muted">
+                                {{ order.delivery_date|date:"D, M d, Y" }}
+                            </small>
+                        </td>
+                        <td data-label="Products">
+                            {% for item in order.items.all %}
+                            <div class="product-item"
+                                title="Price: ₹{{ item.price }} x {{ item.quantity }} Description: {{ item.product.description }}">
+                                <img src="{% if item.product.image %}{{ item.product.image.url }}{% else %}{% static 'images/placeholder.png' %}{% endif %}"
+                                    alt="{{ item.product.name }}">
+                                <span>{{ item.product.name }}</span>
+                            </div>
+                            {% endfor %}
+                        </td>
+                        <td data-label="Status">{{ order.status }}</td>
+                        <td data-label="Action" class="status-buttons">
+                            <div class="button-wrapper">
+                                {% if order.status != 'Delivered' and order.status != 'Cancelled' and order.status != 'Returned' %}
+                                {% for status, display in order.STATUS_CHOICES %}
+                                {% if status != order.status and status != 'Cancelled' and status != 'Returned' %}
+                                <form method="POST" action="{% url 'update_order_status' order.id %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="{{ status }}">
+                                    <button type="submit" class="btn btn-blue">{{ display }}</button>
+                                </form>
+                                {% endif %}
+                                {% endfor %}
+                                {% else %}
+                                <button class="btn btn-gray" disabled>{{ order.status }}</button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">No orders found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const menuToggle = document.querySelector('.menu-toggle');
+        const closeSidebar = document.querySelector('.close-sidebar');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.querySelector('.overlay');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+        });
+
+        closeSidebar.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && sidebar.classList.contains('active') && 
+                !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

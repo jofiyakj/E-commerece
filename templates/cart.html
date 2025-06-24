@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart - GlowCare</title>
+    <link rel="stylesheet" href="{% static 'css/cart.css' %}">
+</head>
+<body>
+    
+    <header class="navbar">
+        <div class="navbar-left">
+            <h1>GlowCare</h1>
+        </div>
+        <nav class="navbar-right">
+            <a href="/">Home</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'user_orders' %}">My Orders</a>
+                <a href="{% url 'cart' %}">Cart</a>
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <!-- <div class="cart-box">
+        {% if user.is_authenticated %}
+            {% if cart_items %}
+                <ul class="cart-items">
+                    {% for item in cart_items %}
+                        <li>
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" width="100">
+                            <h3>{{ item.product.name }}</h3>
+                            <p>Price: ₹{{ item.product.price }}</p>
+                            <p>Quantity: {{ item.quantity }}</p>
+                            <p>Total: ₹{{ item.get_total_price }}</p>
+                            <a href="{% url 'remove_from_cart' item.product.id %}">
+                                <button>Remove</button>
+                            </a>
+<form action="{% url 'update_quantity' item.product.id %}" method="post" style="display:inline;">
+    {% csrf_token %}
+    <input type="number" name="quantity" value="{{ item.quantity }}" min="1">
+    <button type="submit">Update Quantity</button>
+</form>
+
+
+
+                        </li>
+                    {% endfor %}
+                </ul>
+                
+                <h4>Total Price: ₹{{ total_price }}</h4>
+                                          
+                          <form action="{% url 'cart_to_order' %}" method="post">
+    {% csrf_token %}
+    <button type="submit" >Place Order</button>
+</form>
+            {% else %}
+                <p>Your cart is empty.Explore our skincare essentials and glow like never before!</p>
+            {% endif %}
+        {% else %}
+            <p>Please <a href="{% url 'login' %}">log in</a>to view your cart and add skincare products.</p>
+        {% endif %}
+    </div> -->
+  
+<div class="container my-5 cart-container">
+    <h1 class="mb-4">🛒 Your Cart</h1>
+
+    {% if user.is_authenticated %}
+        {% if cart_items_with_subtotals %}
+            <ul class="list-group">
+                {% for entry in cart_items_with_subtotals %}
+                {% with item=entry.item %}
+                <li class="list-group-item d-flex align-items-center justify-content-between flex-wrap">
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="{{ item.product.image.url|default:'/static/images/placeholder.jpg' }}" alt="{{ item.product.name|escape }}" class="img-fluid" style="max-width: 100px; border-radius: 6px;">
+                        <div>
+                            <h5 class="mb-1">{{ item.product.name|escape }}</h5>
+                            <p class="mb-1">Price: ₹{{ item.product.price|floatformat:2 }}</p>
+                            <p class="mb-1">Subtotal: ₹{{ entry.subtotal|floatformat:2 }}</p>
+                            <div class="d-flex align-items-center gap-2">
+                                <form method="POST" action="{% url 'decrement_cart' item.product.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" {% if item.quantity <= 1 %}disabled{% endif %}>-</button>
+                                </form>
+                                <span class="quantity-display">{{ item.quantity }}</span>
+                                <form method="POST" action="{% url 'increment_cart' item.product.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <form method="POST" action="{% url 'remove_from_cart' item.product.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                    </form>
+                </li>
+                {% endwith %}
+                {% endfor %}
+            </ul>
+
+            <div class="total-price-section text-end mt-4">
+                <h4>Total Price: ₹{{ total_price|floatformat:2 }}</h4>
+            </div>
+
+            <div class="mt-4 d-flex justify-content-between flex-wrap gap-3">
+                <a href="{% url 'product_detail' item.product.id %}" class="btn btn-outline-primary">Continue Shopping</a>
+                <form method="POST" action="{% url 'cart_to_order' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-lg">Place Order</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="cart-empty text-center">
+                <img src="{% static 'images/PngItem_4803503.png' %}" alt="Empty cart" class="img-fluid my-4" style="max-width: 200px;">
+                <p class="fs-5">Your cart is empty</p>
+                <h5 class="mb-4 text-muted">Must add items before proceeding to checkout</h5>
+                <a href="{% url 'product_detail'  item.product.id %}" class="btn btn-primary">Return to Shop</a>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-warning text-center">
+            Please <a href="{% url 'login' %}">log in</a> to view your cart and add skincare products.
+        </div>
+    {% endif %}
+</div>
+
+{% if messages %}
+    <div class="container message-container mt-4">
+        {% for message in messages %}
+        <div class="alert alert-info">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+    <footer>
+        <div class="footer-container">
+          <div class="footer-section">
+            <h4>About Us</h4>
+            <p>Glow Care offers luxurious, science-backed skincare solutions for radiant, healthy skin.</p>.</p>
+          </div>
+          <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="/home">Home</a></li>
+              <li><a href="/shop">Shop</a></li>
+              <li><a href="/contact">Contact Us</a></li>
+              <li><a href="/privacy-policy">Privacy Policy</a></li>
+              <li><a href="/terms">Terms & Conditions</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Contact Us</h4>
+            <p>Email: support@glowcare.com</p>
+            <p>Phone: 1-800-123-4567</p>
+          </div>
+          <div class="footer-section">
+            <h4>Follow Us</h4>
+            <ul>
+              <li><a href="https://facebook.com/glowcare">Facebook</a></li>
+              <li><a href="https://twitter.com/glowcare">Twitter</a></li>
+              <li><a href="https://instagram.com/glowcare">Instagram</a></li>
+              <li><a href="https://linkedin.com/company/glowcare">LinkedIn</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2025 GlowCare.com | All Rights Reserved</p>
+        </div>
+    </footer>
+</body>
+</html>

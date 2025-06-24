@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>User Details</title>
+    <link rel="stylesheet" href="{% static 'css/user_detail.css' %}">
+
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2 class="brand">VAULTGUARD</h2>
+        <nav class="sidebar-nav">
+            <a href="{% url 'firstpage' %}">Home</a>
+            <a href="{% url 'add_product' %}">Add Product</a>
+            <a href="{% url 'admin_bookings' %}"> Bookings</a>
+            <a href="{% url 'user_list' %}">User List</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <section class="section-title">User Details: {{ user_obj.username }}</section>
+
+        <!-- Profile Info -->
+        <h3>Profile Info</h3>
+        <ul>
+            <li><strong>Email:</strong> {{ user_obj.email }}</li>
+            <li><strong>Date Joined:</strong> {{ user_obj.date_joined|date:"Y-m-d" }}</li>
+        </ul>
+
+        <!-- Address Info -->
+        <h3>Addresses</h3>
+        {% if addresses %}
+        <ul class="list-group">
+            {% for addr in addresses %}
+            <li class="list-group-item">
+                <strong>{{ addr.name }}</strong><br />
+                {{ addr.address }}<br />
+                Phone: {{ addr.phone }}<br />
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No addresses saved yet.</p>
+        {% endif %}
+
+    </div>
+     {% if messages %}
+        <div class="message-container">
+            {% for message in messages %}
+            <p class="message">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+</body>
+
+</html>

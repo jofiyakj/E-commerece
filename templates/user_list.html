@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User List - GlowCare </title>
+    <link rel="stylesheet" href="{% static 'css/user_list.css' %}">
+</head>
+<body>
+    <header class="top-bar">
+        <button class="menu-toggle">☰</button>
+        <h1 class="brand">GlowCare </h1>
+    </header>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <button class="close-sidebar">✕</button>
+        </div><br><br>
+        <nav class="sidebar-nav">
+            <a href="{% url 'firstpage' %}">Home</a>
+            <a href="{% url 'add_product' %}">Add Product</a>
+            <a href="{% url 'admin_bookings' %}">Bookings</a>
+            <a href="{% url 'user_list' %}" class="active">User List</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <section class="section-title">User List</section>
+
+        {% if messages %}
+        <div class="message-container">
+            {% for message in messages %}
+            <div class="message message-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="table-wrapper">
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th data-label="Username">Username</th>
+                        <th data-label="Email">Email</th>
+                        <th data-label="Date Joined">Date Joined</th>
+                        <th data-label="Actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td data-label="Username"><a href="{% url 'user_detail' user.id %}">{{ user.username }}</a></td>
+                        <td data-label="Email">{{ user.email }}</td>
+                        <td data-label="Date Joined">{{ user.date_joined|date:"Y-m-d" }}</td>
+                        <td data-label="Actions">
+                            <a href="{% url 'delete_user' user.id %}" class="btn btn-red" onclick="return confirm('Are you sure?')">Delete</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4" class="text-center">No users found.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const menuToggle = document.querySelector('.menu-toggle');
+        const closeSidebar = document.querySelector('.close-sidebar');
+        const sidebar = document.querySelector('.sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.add('active');
+        });
+
+        closeSidebar.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && sidebar.classList.contains('active') && 
+                !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

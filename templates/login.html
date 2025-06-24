@@ -4,12 +4,12 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GlowCare / Login</title>
+    <title>GlowCare /User Login</title>
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
 <body>
     <div class="login-container">
-    <h1>Welcome to GlowCare</h1>
+    <h1>Welcome to GlowCare/ User Login</h1>
     <p class="subtitle">Nourish your skin,nourish your soul</p>
 
 
@@ -19,8 +19,23 @@
         <button type="submit">Login</button>
     </form> 
 
-    <p class="register-link">New to GlowCare? <a href="{% url 'register' %}">Create your account</a>
-    </p>
+       <div class="login-extra">
+            <p><a href="{% url 'forgot_password' %}">Forgot Password?</a></p>
+        </div>
+        
+        <div class="login-links">
+            <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+        </div>
+        {% if messages %}
+        <div class="message-container">
+            {% for message in messages %}
+            <p class="message">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    <!-- <p class="register-link">New to GlowCare? <a href="{% url 'register' %}">Create your account</a>
+    </p> -->
     </div>
 </body>
 </html>  

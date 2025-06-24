@@ -1,0 +1,273 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  background-color: #f4f6f8;
+  color: #333;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #1a1a2e;
+  padding: 0.8rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1000;
+}
+
+.top-bar .brand {
+  font-size: clamp(1.2rem, 4vw, 1.4rem);
+  font-weight: bold;
+  color: white;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.sidebar {
+  width: 240px;
+  background-color: #1a1a2e;
+  height: 100vh;
+  padding: 1.5rem;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  transition: transform 0.3s ease;
+  z-index: 999;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.close-sidebar {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.sidebar-nav a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  transition: background 0.3s ease;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+  background-color: #0f3460;
+}
+
+.main-content {
+  margin-left: 240px;
+  padding: 2rem;
+  flex: 1;
+  margin-top: 60px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #1a1a2e;
+}
+
+.message-container {
+  margin: 1rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.message {
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.message-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.message-error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.styled-table thead {
+  background-color: #1a1a2e;
+  color: white;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 1rem 1.2rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.styled-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.styled-table a {
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.styled-table a:hover {
+  text-decoration: underline;
+}
+
+.btn {
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.88rem;
+  color: white;
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-red {
+  background-color: #dc3545;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(230, 57, 70, 0.3);
+}
+
+.btn-red:hover {
+  background-color: #c92a3a;
+}
+
+.text-center {
+  text-align: center;
+}
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: clamp(200px, 60vw, 240px);
+    top: 60px;
+    height: calc(100vh - 60px);
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+    margin-top: 60px;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .close-sidebar {
+    display: block;
+  }
+
+  .styled-table {
+    min-width: 0;
+    display: block;
+  }
+
+  .styled-table thead {
+    display: none;
+  }
+
+  .styled-table tbody, .styled-table tr {
+    display: block;
+  }
+
+  .styled-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: white;
+  }
+
+  .styled-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    border-bottom: none;
+  }
+
+  .styled-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #1a1a2e;
+    width: 40%;
+    flex-shrink: 0;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .styled-table td {
+    font-size: 0.8rem;
+  }
+
+  .btn {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+  }
+}

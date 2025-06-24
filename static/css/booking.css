@@ -1,0 +1,385 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f6f8;
+  display: flex;
+  color: #333;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #1a1a2e;
+  padding: 0.8rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.top-bar .brand {
+  font-size: clamp(1.2rem, 4vw, 1.4rem);
+  font-weight: bold;
+  color: white;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  width: 44px;
+  height: 44px;
+  transition: transform 0.3s ease;
+}
+
+.menu-toggle:hover {
+  transform: scale(1.1);
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 998;
+}
+
+.overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sidebar {
+  width: 240px;
+  background-color: #1a1a2e;
+  height: 100vh;
+  padding: 1.5rem;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  transition: transform 0.3s ease;
+  z-index: 999;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.close-sidebar {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  transition: transform 0.3s ease;
+}
+
+.close-sidebar:hover {
+  transform: scale(1.1);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.sidebar-nav a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+  background-color: #0f3460;
+  transform: translateX(5px);
+}
+
+.main-content {
+  margin-left: 240px;
+  padding: 2rem;
+  flex: 1;
+  margin-top: 60px;
+  transition: margin-left 0.3s ease;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #1a1a2e;
+}
+
+.message-container {
+  margin: 1rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.message {
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.message-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.message-error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.order-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.order-table thead {
+  background-color: #1a1a2e;
+  color: white;
+}
+
+.order-table th, .order-table td {
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.order-table th {
+  font-weight: 600;
+}
+
+.order-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.product-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+}
+
+.product-item img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.product-item span {
+  font-size: 0.9rem;
+}
+
+.button-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+  color: white;
+  text-align: center;
+  min-width: 80px;
+  display: inline-block;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+}
+
+.btn-blue {
+  background-color: #007bff;
+}
+
+.btn-blue:hover {
+  background-color: #0056b3;
+}
+
+.btn-gray {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.status-buttons form {
+  display: inline-block;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+@media screen and (max-width: 1024px) {
+  .order-table {
+    min-width: 800px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: clamp(200px, 60vw, 240px);
+    top: 60px;
+    height: calc(100vh - 60px);
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+    margin-top: 60px;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .close-sidebar {
+    display: block;
+  }
+
+  .order-table {
+    min-width: 0;
+    display: block;
+  }
+
+  .order-table thead {
+    display: none;
+  }
+
+  .order-table tbody, .order-table tr {
+    display: block;
+  }
+
+  .order-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .order-table td {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0.8rem;
+    border-bottom: none;
+    gap: 0.5rem;
+  }
+
+  .order-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #1a1a2e;
+    width: 40%;
+    flex-shrink: 0;
+  }
+
+  .hide-mobile {
+    display: none;
+  }
+
+  .product-item img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .status-buttons .button-wrapper {
+    justify-content: flex-end;
+    flex-grow: 1;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .order-table td {
+    font-size: 0.8rem;
+    padding: 0.6rem;
+  }
+
+  .order-table td::before {
+    font-size: 0.8rem;
+  }
+
+  .btn {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+    min-width: 60px;
+  }
+
+  .product-item img {
+    width: 35px;
+    height: 35px;
+  }
+
+  .product-item span {
+    font-size: 0.8rem;
+  }
+
+  .message {
+    font-size: 0.8rem;
+    padding: 0.6rem;
+  }
+}
