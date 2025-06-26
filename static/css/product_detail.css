@@ -29,6 +29,10 @@ body, html {
   color: #f48f8f;
 }
 
+
+
+/* Product Image Box */
+
 .product-container {
     display: flex;
     max-width: 1200px;
@@ -175,6 +179,15 @@ body, html {
 .similar-products .card img {
     height: 140px;
     object-fit: cover;
+}
+/* Responsive */
+@media (max-width: 768px) {
+    .product-image-box {
+        margin-bottom: 30px;
+    }
+    .star-rating label {
+        font-size: 1.3rem;
+    }
 }
 
 /* Footer Styling */

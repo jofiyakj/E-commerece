@@ -67,17 +67,19 @@
 
                     <label for="offerprice">Offer Price:</label>
                     <input type="number" name="offerprice" step="0.01" value="{{ data1.offerprice|default:'' }}">
+                   <label for="category">Category:</label>
+<select name="category" required>
+    <option value="Cleansers" {% if data1.category == 'Cleansers' %}selected{% endif %}>Cleansers</option>
+    <option value="Moisturizers" {% if data1.category == 'Moisturizers' %}selected{% endif %}>Moisturizers</option>
+    <option value="Serums" {% if data1.category == 'Serums' %}selected{% endif %}>Serums</option>
+    <option value="Sunscreens" {% if data1.category == 'Sunscreens' %}selected{% endif %}>Sunscreens</option>
+    <option value="Exfoliators" {% if data1.category == 'Exfoliators' %}selected{% endif %}>Exfoliators</option>
+    <option value="Toners" {% if data1.category == 'Toners' %}selected{% endif %}>Toners</option>
+    <option value="Face Masks" {% if data1.category == 'Face Masks' %}selected{% endif %}>Face Masks</option>
+    <option value="Lip Care" {% if data1.category == 'Lip Care' %}selected{% endif %}>Lip Care</option>
+</select>
 
-                    <label for="category">Category:</label>
-                    <select name="category" required>
-                        <option value="Lighting" {% if data1.category == 'Lighting' %}selected{% endif %}>Lighting</option>
-                        <option value="Actuators" {% if data1.category == 'Actuators' %}selected{% endif %}>Actuators</option>
-                        <option value="Touch Switches" {% if data1.category == 'Touch Switches' %}selected{% endif %}>Touch Switches</option>
-                        <option value="Security" {% if data1.category == 'Security' %}selected{% endif %}>Security</option>
-                    </select>
 
-                    <label for="warranty">Warranty:</label>
-                    <input type="text" name="warranty" value="{{ data1.warranty|default:'' }}">
 
                     <label for="description">Description:</label>
                     <textarea name="description" required>{{ data1.description|default:'' }}</textarea>

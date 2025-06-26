@@ -13,12 +13,17 @@
     color: inherit;
 }
 
-
-
-    .search-container {
+   .section-title {
+      font-weight: 700;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #212529;
+    }
+      .search-container {
         position: relative;
         width: 300px; /* Adjust as needed */
-    }
+      }
 
     #search-input {
         width: 100%;
@@ -98,8 +103,9 @@
     .product p {
         font-size: 1em;
         color: #555;
-    }
-
+    } 
+  
+  </style>
     </style>
 </head>
 <body>
@@ -108,14 +114,7 @@
             <h1 style="margin-left: 20px;">GlowCare</h1>
         </div>
     
-<!-- Search Bar with Dropdown -->
-<!-- <form class="search-bar" method="GET" action="{% url 'home' %}" onsubmit="saveSearchQuery()">
-    <div class="search-container">
-        <input type="text" id="search-input" name="query" placeholder="Search Products..." autocomplete="off" required oninput="filterDropdown()" onfocus="showDropdown()">
-        <ul id="search-history-dropdown" class="dropdown"></ul>
-        <button type="submit">Search</button>
-    </div>
-</form> -->
+
 
 
 <form class="search-bar d-flex align-items-start gap-2" method="GET" action="{% url 'home' %}" onsubmit="saveSearchQuery()">
@@ -128,10 +127,15 @@
 
 
         <nav class="nav-links">
-            <a href="/">Home</a>
-            <a href="{% url 'user_orders' %}">My Orders</a>
+            <a href="home/">Home</a>
+            <a href="{% url 'product_list' %}">All Products</a>
             <a href="{% url 'cart' %}">Cart</a>
+            <a href="{% url 'profile' %}">Profile</a>
+            {% if user.is_authenticated %}
             <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+            <a href="{% url 'login' %}">Login</a>
+            {% endif %}
         </nav>
 </header>
 <!-- Skincare Carousel -->
@@ -172,26 +176,74 @@
   </button>
 </div>
 
-
-    <main>
-
-{% if products %}
-    <div class="products">
-        {% for product in products %}
-            <a href="{% url 'product_detail' product.id %}" class="product-link">
-                <div class="product">
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
-                    <h2>{{ product.name }}</h2>
-                    <p>₹{{ product.price }}</p>
-                </div>
-            </a>
-        {% endfor %}
+<!-- {% if products %}
+  <div class="products"> -->
+     <section class="products-container container my-5">
+    <h2 class="section-title">Featured Products</h2>
+    <div class="text-center mb-4">
+      <a href="{% url 'product_list' %}" class="btn btn-outline-primary">Show more »</a>
     </div>
+    
+    {% for product in products %}
+      <div class="product">
+        <a href="{% url 'product_detail' product.id  %}" class="product-link">
+          <img src="{{ product.image.url }}" alt="Image of {{ product.name }}">
+        </a>
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ product.name }}</h5>
+          <p class="card-text mb-2">
+            <del>₹{{ product.price }}</del>
+            <strong class="text-danger">₹{{ product.offerprice }}</strong>
+          </p>
+          <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-primary mt-auto">
+            View Details
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 {% else %}
-    <h1 style="margin: 200px;">No products found for your search.</h1>
+  <h1 style="margin: 200px;">No products found for your search.</h1>
 {% endif %}
-
-    </main>
+  </section>
+   
+ 
+   <!-- Recommended for You -->
+  {% if user.is_authenticated and recommended_products %}
+  <section class="products-container container my-5">
+    <h2 class="section-title">Recommended for You</h2>
+    <div class="row g-4">
+      {% for product in recommended_products %}
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="card h-100 text-center shadow-sm">
+          <a href="{% url 'product_detail' product.id %}">
+            <img
+              src="{{ product.image.url }}"
+              class="card-img-top"
+              alt="Image of {{ product.name }}"
+              style="height: 220px; object-fit: contain;"
+            />
+          </a>
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ product.name }}</h5>
+            <p class="card-text mb-2">
+              <del>₹{{ product.price }}</del>
+              <strong class="text-danger">₹{{ product.offerprice }}</strong>
+            </p>
+            <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-primary mt-auto"
+              >View Details</a
+            >
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center">
+        <p>No recommendations available yet. Browse more products to get personalized suggestions!</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
     <footer>
       <div class="footer-container">
         <div class="footer-section">

@@ -6,67 +6,230 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ product.name }} - GlowCare Skincare</title>
     <link rel="stylesheet" href="{% static 'css/product_detail.css' %}">
+      <style>
+        body {
+            padding-top: 70px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        .product-image-box {
+            border: 1px solid #ddd;
+            padding: 20px;
+            background-color: #f9f9f9;
+            text-align: center;
+            border-radius: 10px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .product-image-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .thumbnail-gallery {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .thumbnail-gallery img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .thumbnail-gallery img.active {
+            border-color: #007bff;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            margin-top: 20px;
+        }
+
+        .offer-price {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #6c757d;
+            margin-left: 10px;
+        }
+
+        .buttons .btn {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .stock-status {
+            margin-top: 10px;
+            font-size: 1rem;
+        }
+
+        .low-stock {
+            color: #ffffff;
+            /* White text */
+            font-weight: bold;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .quantity-selector input {
+            width: 60px;
+            text-align: center;
+        }
+
+        .similar-products .card {
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+
+        .similar-products .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .similar-products .card-body {
+            text-align: center;
+        }
+
+        .reviews-section {
+            margin-top: 40px;
+        }
+
+        .review-item {
+            border-bottom: 1px solid #ddd;
+            padding: 15px 0;
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+        .review-rating {
+            color: #ffc107;
+            font-size: 1.2rem;
+        }
+
+        .review-rating .fa-star {
+            color: #ffc107;
+        }
+
+        .review-rating .fa-star-o {
+            color: #ccc;
+        }
+
+        .review-form {
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .message-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .star-rating {
+            direction: rtl;
+            display: inline-block;
+            font-size: 1.5rem;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            color: #ccc;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .star-rating input:checked~label,
+        .star-rating label:hover,
+        .star-rating label:hover~label {
+            color: #ffc107;
+        }
+
+        @media (max-width: 768px) {
+            .product-image-box {
+                height: 300px;
+            }
+
+            .buttons .btn {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
+
     <!-- Header/Navbar -->
-    <header class="navbar">
-        <div class="navbar-left">
-            <h1>GlowCare</h1>
+       <header class="navbar navbar-expand-lg navbar-dark bg-dark px-3 fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'home' %}">GlowCare</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+                <form class="d-flex me-auto" method="GET" action="{% url 'search_results' %}">
+                    <input class="form-control me-2" type="text" name="q" placeholder="Search products..." required>
+                    <button class="btn btn-outline-light" type="submit">Search</button>
+                </form>
+                <ul class="navbar-nav ms-3 gap-2">
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'home' %}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'product_list' %}">All Products</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'cart_view' %}">Cart</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'profile' %}">Profile</a></li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'logout' %}">Logout</a></li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link text-white" href="{% url 'login' %}">Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-        <nav class="navbar-right">
-            <a href="/">Home</a>
-            
-            {% if user.is_authenticated %}
-                <a href="{% url 'user_orders' %}">My Orders</a>
-                <a href="{% url 'cart' %}">Cart</a>
-            {% endif %}
-            
-            <a href="{% url 'login' %}">Login</a>
-        </nav>
     </header>
 
-    <!-- Main Container -->
-    <!-- <div class="product-container"> -->
-        <!-- Left: Image Gallery -->
-        <!-- <div class="image-gallery">
-            <div class="main-image">
-                {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
-                {% else %}
-                    <p>No image available.</p>
-                {% endif %}
-            </div>
-        </div> -->
 
-        <!-- Middle: Product Details -->
-        <!-- <div class="product-details">
-            <h1>{{ product.name }}</h1>
-            <p class="price">₹{{ product.price }}</p>
-            <p class="stock-status">
-                {% if product.stock > 0 %} In Stock {% else %} Out of Stock {% endif %}
-            </p>
-            <p class="description">{{ product.description }}</p>
-            
-            <div class="action-buttons">
-                <form action="{% url 'add_to_cart' product.id %}" method="POST" class="cart-form">
-                    {% csrf_token %}
-                    <button type="submit" class="btn add-to-cart">Add to Cart</button>
-                </form>
-                 <a href="{% url '' product.id %}" class="btn buy-now">Buy Now</a> -->
-            <!-- </div> -->
-        <!-- </div> --> 
-
-        <!-- Right: Specifications -->
-        <!-- <div class="product-specifications">
-            <h3>Product Highlights</h3>
-            <ul>
-                <li><strong>Category:</strong> {{ product.category }}</li>
-                <li><strong>Price:</strong> ₹{{ product.price }}</li>
-                <li><strong>Availability:</strong> {{ product.stock }}</li>
-            </ul>
-        </div>
-    </div>
-     -->
 
       <main class="container my-5">
         {% if messages %}
@@ -86,15 +249,18 @@
             <div class="col-lg-4">
                 <div class="product-image-box">
                     <img id="main-image"
-                        src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'images/placeholder.jpg' %}{% endif %}"
+                        src="{{ product.image.url }}"
                         alt="{{ product.name|escape }}">
                 </div>
-                <div class="thumbnail-gallery">
-                    {% for image in additional_images %}
-                    <img src="{{ image.url }}" alt="{{ product.name|escape }} thumbnail"
-                        onclick="changeImage('{{ image.url }}')" class="{% if forloop.first %}active{% endif %}">
-                    {% endfor %}
-                </div>
+               <div class="thumbnail-gallery mt-3 d-flex gap-2">
+    {% for image in additional_images %}
+    <img src="{{ image.url }}"
+         alt="{{ product.name|escape }} thumbnail"
+         onclick="changeImage('{{ image.url }}')"
+         class="thumbnail-img {% if forloop.first %}active{% endif %}">
+    {% endfor %}
+</div>
+
                 <div class="buttons mt-4">
                     {% if product.stock > 0 %}
                     <form method="POST" action="{% url 'buy_now' product.id %}" class="mb-2">
@@ -109,7 +275,7 @@
                         <button type="submit" class="btn btn-outline-primary btn-lg w-100 mt-2">Add to Cart</button>
                     </form>
                     {% else %}
-                    <a href="{% url 'cart_view' %}" class="btn btn-outline-primary btn-lg mt-2">Go to Cart</a>
+                    <a href="{% url 'cart' %}" class="btn btn-outline-primary btn-lg mt-2">Go to Cart</a>
                     {% endif %}
                     {% else %}
                     <button class="btn btn-secondary btn-lg" disabled>Out of Stock</button>
@@ -212,7 +378,7 @@
             <h2 class="mb-4">Similar Products</h2>
             <div class="d-flex overflow-auto gap-3 pb-3">
                 {% for item in similar_products %}
-                    {% if item.id %}
+                    
                 <div class="card shadow-sm" style="min-width: 180px; max-width: 180px;">
                     <img src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'images/placeholder.jpg' %}{% endif %}"
                         class="card-img-top" style="height: 140px; object-fit: cover;" alt="{{ item.name|escape }}">
@@ -229,7 +395,7 @@
                         <a href="{% url 'product_detail' item.id %}" class="btn btn-sm btn-outline-primary">View</a>
                     </div>
                 </div>
-                     {% endif %}
+                     
                 {% endfor %}
             </div>
         </section>
@@ -270,5 +436,14 @@
           <p>&copy; 2025 GlowCare | All Rights Reserved</p>
         </div>
     </footer>
+    <script>
+    function changeImage(url) {
+        document.getElementById('main-image').src = url;
+        const thumbnails = document.querySelectorAll('.thumbnail-img');
+        thumbnails.forEach(img => img.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+</script>
+
 </body>
 </html>

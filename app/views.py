@@ -21,6 +21,8 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 import razorpay
 from django.conf import settings
+import numpy as np
+from django.contrib import auth
 from .models import Product, Cart, CartItem
 from django.views.decorators.csrf import csrf_exempt
 from razorpay.errors import BadRequestError, ServerError, GatewayError
@@ -29,38 +31,31 @@ from razorpay.errors import BadRequestError, ServerError, GatewayError
 
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
-@login_required
-@user_passes_test(lambda u: u.is_superuser)
-def admin_home_view(request):
-    return render(request, 'admin_home.html')
-
-def admin_home(request):
-    return render(request, 'admin_home.html')
-
-
-def category_list(request):
-    categories = Product.objects.values_list('category', flat=True).distinct()
-    return render(request, 'category_list.html', {'categories': categories})
 
 
 def home(request):
     query = request.GET.get('query')
-    
+    recommended_products = []
+
+    if request.user.is_authenticated:
+        recommended_products = get_recommendations(request.user, top_n=4)
+
+    if not recommended_products:
+        recommended_products = Product.objects.order_by('?')[:4]
+
     if query:
-        # Check for exact match (case-insensitive)
         exact_matches = Product.objects.filter(name__iexact=query)
-        
         if exact_matches.count() == 1:
-            # Redirect to the product detail page
             return redirect('product_detail', product_id=exact_matches.first().id)
-        
-        # Else show partial matches
         products = Product.objects.filter(name__icontains=query)
     else:
-        products = Product.objects.all()
-        
-    return render(request, 'home.html', {'products': products})
+        products = Product.objects.all().order_by('-id')[:8]
 
+    return render(request, 'home.html', {
+        'products': products,
+        'recommended_products': recommended_products,
+        'query': query,
+    })
 
 @login_required(login_url='login')
 def recommendations(request):
@@ -69,11 +64,6 @@ def recommendations(request):
 
 
 
-# def product_detail(request, product_id):
-#     product = get_object_or_404(Product, id=product_id)
-#     if request.method == 'POST':
-#         return redirect('order_product', product_id=product.id)
-#     return render(request, 'product_detail.html', {'product': product})
 
 
 def update_product_vector(product):
@@ -86,7 +76,7 @@ def update_product_vector(product):
             "pro_id": product.id,
             "name": product.name,
             "rating": product.rating,
-            "category": product.category,
+            "type": product.category,
             "description": product.description,
             "reviews": ', '.join(reviews_text)  # Combine review texts
         }]
@@ -109,8 +99,8 @@ def update_product_vector(product):
         product.save()
 
 
-def product_detail(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
+def product_detail(request, id):
+    product = get_object_or_404(Product, id=id)
     cart_item_ids = []
     product_reviews = product.reviews_set.all()  # Fetch all reviews for this product
     print(f"Reviews for product {product.id}: {product_reviews.count()}")  # Debugging line
@@ -121,12 +111,18 @@ def product_detail(request, product_id):
         if cart:
             cart_item_ids = cart.items.values_list('product_id', flat=True)
 
-        # Get or create user extension (users model)
-        user_obj, created = users.objects.get_or_create(user=request.user)
+      
 
         # Add to view history
-        ViewHistory.objects.create(user=user_obj, product=product)
-        vectorize_single_user(request.user)
+     
+        try:    
+            user_obj = users.objects.get(user=request.user)
+            ViewHistory.objects.create(user=user_obj, product=product)
+            vectorize_single_user(request.user)
+        except users.DoesNotExist:
+            user_obj = users.objects.create(user=request.user)
+            ViewHistory.objects.create(user=user_obj, product=product)
+            vectorize_single_user(request.user)
 
         # Handle review submission
         if request.method == 'POST':
@@ -138,7 +134,9 @@ def product_detail(request, product_id):
             else:
                 try:
                     rating = int(rating)
-                    if 1 <= rating <= 5:
+                    if rating < 1 or rating > 5:
+                        messages.error(request, "Rating must be between 1 and 5.", extra_tags='review')
+                    else:
                         # Save new review
                         new_review = reviews.objects.create(
                             pname=product,
@@ -149,18 +147,17 @@ def product_detail(request, product_id):
                         print(f"Created review ID {new_review.id} for product {product.id}")  # Debug
 
                         # Update product rating
-                        all_reviews = product.reviews_set.all()
-                        total_rating = sum(r.rating for r in all_reviews)
-                        product.rating = round(total_rating / len(all_reviews), 1)
+                        total_reviews = product.reviews_set.all()
+                        total_rating = sum(r.rating for r in total_reviews)
+                        product.rating = round(total_rating / len(total_reviews), 1)
                         product.save()
 
                         # Update vector
                         update_product_vector(product)
 
                         messages.success(request, "Review added successfully!", extra_tags='review')
-                        return redirect('product', product_id=product.id)
-                    else:
-                        messages.error(request, "Rating must be between 1 and 5.", extra_tags='review')
+                        return redirect('product_detail', id=product.id)
+                 
                 except ValueError:
                     messages.error(request, "Invalid rating value.", extra_tags='review')
                 except Exception as e:
@@ -197,19 +194,46 @@ def is_valid_password(password):
         re.search(r"\d", password) and
         re.search(r"[!@#$%^&*(),.?\":{}|<>]", password)
     )
-# def register(request):
-#     if request.method == 'POST':
-#         form = UserCreationForm(request.POST)
-#         if form.is_valid():
-#             user = form.save()
-#             login(request, user)
-#             return redirect('home')
-#     else:
-#         form = UserCreationForm()
-#     return render(request, 'register.html', {'form': form})
 
 
+def product_list(request):
+    products = Product.objects.all()
+    categories = Product.objects.values_list('category', flat=True).distinct()
 
+    category = request.GET.get('category')
+    sort = request.GET.get('sort')
+
+    if category:
+        products = products.filter(category=category)
+    
+    if sort == 'newest':
+        products = products.order_by('-id')
+    elif sort == 'low_to_high':
+        products = products.order_by('offerprice')
+    elif sort == 'high_to_low':
+        products = products.order_by('-offerprice')
+
+    return render(request, 'allproduct.html', {
+        'products': products,
+        'categories': categories,
+    })
+
+
+def search_results(request):
+    query = request.GET.get('q')
+    results = Product.objects.filter(name__icontains=query) if query else Product.objects.all()
+    
+    if query and request.user.is_authenticated:
+        try:
+            user_obj = users.objects.get(user=request.user)
+            SearchHistory.objects.create(user=user_obj, query=query)
+            vectorize_single_user(request.user)
+        except users.DoesNotExist:
+            user_obj = users.objects.create(user=request.user)
+            SearchHistory.objects.create(user=user_obj, query=query)
+            vectorize_single_user(request.user)
+    
+    return render(request, 'search_results.html', {'results': results, 'query': query})
 
 
 
@@ -260,18 +284,13 @@ def register_view(request):
 
         # Safely generate and assign vector data
         user_vector = combine_user_with_search_and_views(user_profile)
-        if user_vector is not None:
-            try:
-                user_profile.vector_data = json.dumps(user_vector.tolist())
-                user_profile.save()
-            except Exception as e:
-                messages.warning(request, f"User registered, but vector data save failed: {e}")
-        else:
-            messages.warning(request, "User registered, but no vector data was generated.")
+        user_profile.vector_data = json.dumps(user_vector.tolist())
+        user_profile.save()
 
         messages.success(request, "Registration successful. Please login.")
         return redirect('login')
 
+    # Clear messages for GET request
     messages.get_messages(request).used = True
     return render(request, 'register.html')
 
@@ -282,16 +301,22 @@ def register_view(request):
 
 def login_view(request):
     if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
+        username = request.POST['username']
+        password = request.POST['password']
+
+        user = auth.authenticate(username=username, password=password)
+        if user is not None:
+            auth.login(request, user)
+
             if user.is_superuser:
-                return redirect('admin_home')  # Ensure 'admin_home' is mapped in urls.py
-            return redirect('home')
-    else:
-        form = AuthenticationForm()
-    return render(request, 'login.html', {'form': form})
+                return redirect('firstpage')
+            else:
+                return redirect('home')
+        else:
+            messages.error(request, "Invalid credentials")
+            return redirect('login')
+
+    return render(request, 'login.html')
 
 def logout_view(request):
     logout(request)
@@ -363,7 +388,7 @@ def edit_g(request, id):
         product.price = request.POST.get('price')
         product.offerprice = request.POST.get('offerprice')
         product.category = request.POST.get('category')
-        product.warranty = request.POST.get('warranty')
+       
         product.description = request.POST.get('description')
         product.stock = request.POST.get('stock')
 
@@ -388,21 +413,6 @@ def edit_g(request, id):
 
 
 
-# @login_required(login_url='login')  # Ensure user is logged in before proceeding
-# def order_product(request, product_id):
-#     product = get_object_or_404(Product, id=product_id)
-#     if request.method == 'POST':
-#         quantity = int(request.POST['quantity'])
-#         order = Order.objects.create(user=request.user, product=product, quantity=quantity)
-#         return redirect('order_detail', order_id=order.id)
-#     return render(request, 'order_product.html', {'product': product})
-
-
-
-# @login_required(login_url='login')  # Ensure user is logged in before proceeding
-# def order_detail(request, order_id):
-#     order = get_object_or_404(Order, id=order_id)
-#     return render(request, 'order_detail.html', {'order': order})
 
 
 
@@ -418,7 +428,7 @@ def add_product(request):
         offerprice = request.POST.get('offerprice')
         description = request.POST.get('description')
         category = request.POST.get('category')
-        warranty = request.POST.get('warranty')
+       
         stock = request.POST.get('stock')
         image = request.FILES.get('image')
         additional_image1 = request.FILES.get('additional_image1')
@@ -433,7 +443,7 @@ def add_product(request):
                 'offerprice': offerprice,
                 'description': description,
                 'category': category,
-                'warranty': warranty,
+                
                 'stock': stock,
             })
 
@@ -451,7 +461,7 @@ def add_product(request):
                 'offerprice': offerprice,
                 'description': description,
                 'category': category,
-                'warranty': warranty,
+                
                 'stock': stock,
             })
 
@@ -461,7 +471,7 @@ def add_product(request):
             offerprice=offerprice,
             description=description,
             category=category,
-            warranty=warranty,
+            
             stock=stock,
             image=image,
             additional_image1=additional_image1,
@@ -514,7 +524,7 @@ def add_to_cart(request, product_id):
 
     if product.stock <= 0:
         messages.error(request, "Product is out of stock.", extra_tags='stock')
-        return redirect('product_detail', product_id=product_id)
+        return redirect('product_detail', id=product_id)
 
     cart, _ = Cart.objects.get_or_create(user=request.user)
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
@@ -526,42 +536,43 @@ def add_to_cart(request, product_id):
             quantity = int(request.POST.get('quantity', 1))
             if quantity < 1:
                 messages.error(request, "Quantity must be at least 1.", extra_tags='stock')
-                return redirect('product_detail', product_id=product_id)
+                return redirect('product_detail', id=product_id)
             if quantity > product.stock:
                 messages.error(request, f"Only {product.stock} items available.", extra_tags='stock')
-                return redirect('product_detail', product_id=product_id)
+                return redirect('product_detail', id=product_id)
         except ValueError:
             messages.error(request, "Invalid quantity.", extra_tags='stock')
-            return redirect('product_detail', product_id=product_id)
+            return redirect('product_detail', id=product_id)
 
-        if created:
+        if not created:
             cart_item.quantity = quantity
-        else:
+        
             if cart_item.quantity + quantity > product.stock:
                 messages.error(request, f"Adding this quantity exceeds stock. Only {product.stock} item(s) available.", extra_tags='stock')
-                return redirect('product_detail', product_id=product_id)
+                return redirect('product_detail', id=product_id)
             cart_item.quantity += quantity
-
+        else:
+             cart_item.quantity=quantity
         cart_item.save()
-        messages.success(request, f"Added {quantity} × {product.name} to cart.")
+        messages.success(request, f"{quantity} item(s) added to cart.", extra_tags='stock')
         return redirect('cart')
 
     # Add a fallback return (in case it's a GET request or something goes wrong)
-    return redirect('product_detail', product_id=product_id)
+    return redirect('product_detail', id=product_id)
 
 @login_required(login_url='login')
 def increment_cart(request, id):
-    if request.method == "POST":
-        cart_item = get_object_or_404(CartItem, id=id, cart__user=request.user)
-        product = cart_item.product
+    
+    cart_item = get_object_or_404(CartItem, id=id, cart__user=request.user)
+    product = cart_item.product
 
-        if cart_item.quantity >= product.stock:
-            messages.warning(request, f"Only {product.stock} items in stock.")
-        else:
-            cart_item.quantity += 1
-            cart_item.save()
-            messages.success(request, "Quantity increased.")
+    if cart_item.quantity >= product.stock:
+        messages.error(request, "No more stock available.")
+        return redirect('cart')
 
+    cart_item.quantity += 1
+    cart_item.save()
+    messages.success(request, "Quantity updated.")
     return redirect('cart')
 
 @login_required(login_url='login')
@@ -586,7 +597,7 @@ def buy_now(request, product_id):
     # Check if product is out of stock
     if product.stock <= 0:
         messages.error(request, "Product is out of stock.", extra_tags='stock')
-        return redirect('product', id=product_id)
+        return redirect('product_detail', id=product_id)
 
     # Default quantity
     quantity = 1
@@ -595,13 +606,13 @@ def buy_now(request, product_id):
             quantity = int(request.POST.get('quantity', 1))
             if quantity < 1:
                 messages.error(request, "Quantity must be at least 1.", extra_tags='stock')
-                return redirect('product', id=product_id)
+                return redirect('product_detail', id=product_id)
             if quantity > product.stock:
                 messages.error(request, f"Only {product.stock} items available.", extra_tags='stock')
-                return redirect('product', id=product_id)
+                return redirect('product_detail', id=product_id)
         except ValueError:
             messages.error(request, "Invalid quantity.", extra_tags='stock')
-            return redirect('product', id=product_id)
+            return redirect('product_detail', id=product_id)
 
     # Get or create the user's cart
     cart, _ = Cart.objects.get_or_create(user=request.user)
@@ -612,7 +623,7 @@ def buy_now(request, product_id):
         # Check if adding the new quantity exceeds stock
         if cart_item.quantity + quantity > product.stock:
             messages.error(request, f"Stock limit reached. Only {product.stock - cart_item.quantity} more items available.", extra_tags='stock')
-            return redirect('product', id=product_id)
+            return redirect('product_detail', id=product_id)
         cart_item.quantity += quantity
     else:
         cart_item.quantity = quantity
@@ -625,7 +636,7 @@ def buy_now(request, product_id):
 def remove_from_cart(request, product_id):
     try:
         cart = Cart.objects.get(user=request.user)
-        cart_item = get_object_or_404(CartItem, cart=cart, product_id=product_id)
+        cart_item = get_object_or_404(CartItem, cart=cart, id=product_id)
         cart_item.delete()
     except Cart.DoesNotExist:
         pass
@@ -636,9 +647,9 @@ def delete_cart_item(request, id):
     cart_item = get_object_or_404(CartItem, id=id, cart__user=request.user)
     cart_item.delete()
     messages.success(request, 'Item removed.')
-    return redirect('cart_view')
+    return redirect('cart')
 @login_required(login_url='login')
-def cart_view(request):
+def cart(request):
     cart = Cart.objects.filter(user=request.user).first()
     cart_items = cart.items.all() if cart else []
     total_price = sum(item.get_total_price() for item in cart_items)  # Now uses offerprice
@@ -652,8 +663,7 @@ def cart_view(request):
         'total_price': total_price
     })
 
-def get_total_price(self):
-    return self.product.offerprice * self.quantity
+
 
 
 @login_required(login_url='login')
@@ -669,7 +679,7 @@ def checkout(request):
 
     if total_price <= 0:
         messages.error(request, "Invalid cart total. Please check your cart and try again.")
-        return redirect('cart_view')
+        return redirect('cart')
 
     razorpay_order = None
     if total_price > 0:
@@ -681,16 +691,16 @@ def checkout(request):
             })
         except BadRequestError:
             messages.error(request, "Invalid request to payment gateway. Please try again later.")
-            return redirect('cart_view')
+            return redirect('cart')
         except ServerError:
             messages.error(request, "Payment gateway server error. Please try again later.")
-            return redirect('cart_view')
+            return redirect('cart')
         except GatewayError:
             messages.error(request, "Payment gateway error. Please try again later.")
-            return redirect('cart_view')
+            return redirect('cart')
         except Exception:
             messages.error(request, "An unexpected error occurred. Please try again later.")
-            return redirect('cart_view')
+            return redirect('cart')
 
     context = {
         'cart_items': cart_items,
@@ -715,7 +725,7 @@ def process_checkout(request):
         
         if not cart_items.exists():
             messages.error(request, 'Your cart is empty.', extra_tags='stock')
-            return redirect('cart_view')
+            return redirect('cart')
         
         if not address_id:
             messages.error(request, 'Please select a billing address.', extra_tags='stock')
@@ -786,7 +796,7 @@ def order_detail_view(request, order_id):
 def update_order_status(request, order_id):
     if not request.user.is_superuser:
         messages.error(request, "You do not have permission to perform this action.")
-        return redirect('index')
+        return redirect('home')
 
     order = get_object_or_404(Order, id=order_id)
     
@@ -854,14 +864,14 @@ def update_quantity(request, product_id):
             
 
     return redirect('checkout')
-
+@login_required(login_url='login')
 def payment_successful(request):
     if request.user.is_superuser:
         return redirect('admin_bookings')
     order = Order.objects.filter(user=request.user).order_by('-created_at').first()
     if not order:
         messages.error(request, 'No recent order found.')
-        return redirect('index')
+        return redirect('home')
     return render(request, 'payment_successful.html', {'order': order})
 
 def order_tracking(request):
@@ -1145,7 +1155,7 @@ def edit_username(request):
 @login_required
 def admin_bookings(request):
     if not request.user.is_superuser:
-        return redirect('index')
+        return redirect('home')
     orders = Order.objects.all().order_by('-created_at')
     
     # Calculate delivery date for each order (created_at + 5 days)
@@ -1159,7 +1169,7 @@ def confirm_order(request, order_id):
     # Ensure only admins can access this view
     if not request.user.is_superuser:
         messages.error(request, "You do not have permission to perform this action.")
-        return redirect('index')
+        return redirect('home')
 
     order = get_object_or_404(Order, id=order_id)
     
@@ -1203,7 +1213,7 @@ def order_success(request):
     order = Order.objects.filter(user=request.user).order_by('-created_at').first()
     if not order:
         messages.error(request, 'No recent order found.')
-        return redirect('index')
+        return redirect('home')
     return render(request, 'order_success.html', {'order': order})
 
 @login_required
@@ -1229,91 +1239,6 @@ def return_order(request, order_id):
 
 
 
-# @login_required(login_url='login')
-# def order_product(request, product_id):
-#     product = get_object_or_404(Product, id=product_id)
-
-#     if request.method == 'POST':
-#         quantity = int(request.POST['quantity'])
-
-#         # Create a new Order
-#         order = Order.objects.create(user=request.user)
-
-#         # Create a single OrderItem for the product
-#         OrderItem.objects.create(
-#             order=order,
-#             product=product,
-#             quantity=quantity
-#         )
-
-#         # Optionally update product stock
-#         product.stock -= quantity
-#         product.save()
-
-#         return redirect('order_detail', order_id=order.id)
-
-#     return render(request, 'order_product.html', {'product': product})
-
-
-
-#NEW CART TO ORDER VIEW
-
-
-
-# @login_required(login_url='login')
-
-# def cart_to_order(request):
-#     cart = get_object_or_404(Cart, user=request.user)
-#     cart_items = cart.items.all()
-
-#     if not cart_items.exists():
-#         return HttpResponse("Your cart is empty.")
-
-
-#     print("Checking",request.user)
-#     # Create a new Order
-#     order = Order.objects.create(user=request.user)
-
-#     # Create OrderItems from CartItems
-#     order_summary = ""
-#     for item in cart_items:
-#         if item.product.stock < item.quantity:
-#             messages.error(
-#                 request,
-#                 f"Insufficient stock for {item.product.name}. Available: {item.product.stock}, Requested: {item.quantity}"
-#             )
-#             return redirect('view')
-#         else:
-#             OrderItem.objects.create(
-#                 order=order,
-#                 product=item.product,
-#                 quantity=item.quantity
-#             )
-#             print("Checking",item.product.name)
-#             print("Checking",item.quantity)
-#             print("Checking",item.product.stock)
-#             # Optionally decrease product stock
-#             item.product.stock -= item.quantity
-#             item.product.save()
-
-#             # Build summary
-#             order_summary += f"{item.product.name} - {item.quantity}\n"
-
-#     # Clear cart
-#     cart.items.all().delete()
-
-#     # Send confirmation email
-#     send_mail(
-#         subject='Your Order Confirmation',
-#         message=f"Hi {request.user},\n\nThank you for your order!\n\nOrder ID: {order.id}\nItems:\n{order_summary}",
-#         from_email='jofiyakj@gmail.com',
-#         recipient_list=[request.user.email],
-#         fail_silently=False,
-#     )
-
-#     return redirect('order_detail', order_id=order.id)
-
-
 
 
 
@@ -1327,61 +1252,9 @@ def user_orders(request):
     orders = Order.objects.filter(user=request.user)
     return render(request, 'user_orders.html', {'orders': orders})
 
-# @login_required(login_url='login')  # Ensure user is logged in before proceeding
-# def add_to_cart(request, product_id):
-#     product = get_object_or_404(Product, id=product_id)
-#     cart, _ = Cart.objects.get_or_create(user=request.user)
-#     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-#     if not created:
-#         cart_item.quantity += 1
-#         cart_item.save()
-#     return redirect('view_cart')
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-# @login_required(login_url='login')  # Ensure user is logged in before proceeding
-# def view_cart(request):
-#     cart, _ = Cart.objects.get_or_create(user=request.user)
-#     cart_items = cart.items.all()
-#     total_price = cart.get_total_price()
-#     return render(request, 'view_cart.html', {'cart_items': cart_items, 'total_price': total_price})
-
-# @login_required(login_url='login')  # Ensure user is logged in before proceeding
-# def remove_from_cart(request, product_id):
-#     cart = get_object_or_404(Cart, user=request.user)
-#     product = get_object_or_404(Product, id=product_id)
-#     cart_item = get_object_or_404(CartItem, cart=cart, product=product)
-#     cart_item.delete()
-#     return redirect('cart')
-
-
-
-# @login_required(login_url='login')
-# def update_quantity(request, product_id):
-#     if request.method == "POST":
-#         new_quantity = int(request.POST.get("quantity", 1))
-#         cart = get_object_or_404(Cart, user=request.user)
-#         cart_item = get_object_or_404(CartItem, cart=cart, product_id=product_id)
-
-#         if new_quantity > 0:
-#             cart_item.quantity = new_quantity
-#             cart_item.save()
-#         else:
-#             cart_item.delete()
-
-#     return redirect('cart')
 
 
 
@@ -1402,30 +1275,4 @@ def search_products(request):
 
 
 
-# @login_required
-# def initiate_payment(request):
-#     client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
-#     amount = 50000  # Amount in paise (₹500.00)
-#     currency = 'INR'
-
-#     payment = client.order.create({
-#         'amount': amount,
-#         'currency': currency,
-#         'payment_capture': 1
-#     })
-
-#     context = {
-#         'payment': payment,
-#         'key_id': settings.RAZORPAY_KEY_ID,
-#         'amount': amount,
-#         'user': request.user
-#     }
-#     return render(request, 'payment.html', context)
-
-# def payment_success(request):
-#     payment_id = request.GET.get('payment_id')
-#     # Optionally verify payment with Razorpay API
-#     # Save order/payment in DB
-#     return render(request, 'payment_success.html', {'payment_id': payment_id})
-# @login_required(login_url='login')

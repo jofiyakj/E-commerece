@@ -57,8 +57,8 @@
             </form>
             <ul class="navbar-nav ms-3 gap-2">
                 <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'product_list' %}">Shop</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'view' %}">Cart</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'product_list' %}">All Product</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'cart' %}">Cart</a></li>
                 <li class="nav-item"><a class="nav-link active" href="{% url 'profile' %}">Profile</a></li>
                 {% if user.is_authenticated %}
                     <li class="nav-item"><a class="nav-link text-danger" href="{% url 'logout' %}">Logout</a></li>
