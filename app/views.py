@@ -239,6 +239,61 @@ def search_results(request):
 
 
 
+# def register_view(request):
+#     if request.method == 'POST':
+#         username = request.POST.get('username', '').strip()
+#         email = request.POST.get('email', '').strip()
+#         password = request.POST.get('password', '')
+#         confpassword = request.POST.get('confpassword', '')
+
+#         # Basic validation
+#         if not username or not email or not password or not confpassword:
+#             messages.error(request, "All fields are required.")
+#             return redirect('register')
+
+#         if password != confpassword:
+#             messages.error(request, "Passwords do not match.")
+#             return redirect('register')
+
+#         try:
+#             validate_email(email)
+#         except ValidationError:
+#             messages.error(request, "Invalid email format.")
+#             return redirect('register')
+
+#         if User.objects.filter(username=username).exists():
+#             messages.error(request, "Username already exists.")
+#             return redirect('register')
+
+#         if User.objects.filter(email=email).exists():
+#             messages.error(request, "Email already in use.")
+#             return redirect('register')
+
+#         if not is_valid_password(password):
+#             messages.error(
+#                 request,
+#                 "Password must be at least 8 characters long, contain an uppercase letter, a number, and a special character."
+#             )
+#             return redirect('register')
+
+#         # Create user and profile
+#         user = User.objects.create_user(username=username, email=email, password=password)
+#         user.save()
+
+#         user_profile = users.objects.create(user=user)
+
+#         # Safely generate and assign vector data
+#         user_vector = combine_user_with_search_and_views(user_profile)
+#         user_profile.vector_data = json.dumps(user_vector.tolist())
+#         user_profile.save()
+
+#         messages.success(request, "Registration successful. Please login.")
+#         return redirect('login')
+
+#     # Clear messages for GET request
+#     messages.get_messages(request).used = True
+#     return render(request, 'register.html')
+
 def register_view(request):
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
@@ -284,8 +339,11 @@ def register_view(request):
 
         # Safely generate and assign vector data
         user_vector = combine_user_with_search_and_views(user_profile)
-        user_profile.vector_data = json.dumps(user_vector.tolist())
-        user_profile.save()
+        if user_vector is not None:
+            user_profile.vector_data = json.dumps(user_vector.tolist())
+            user_profile.save()
+        else:
+            print("Warning: user_vector is None. Skipping vector_data assignment.")
 
         messages.success(request, "Registration successful. Please login.")
         return redirect('login')
@@ -293,7 +351,6 @@ def register_view(request):
     # Clear messages for GET request
     messages.get_messages(request).used = True
     return render(request, 'register.html')
-
 
 
 
@@ -574,6 +631,7 @@ def increment_cart(request, id):
     cart_item.save()
     messages.success(request, "Quantity updated.")
     return redirect('cart')
+
 
 @login_required(login_url='login')
 def decrement_cart(request, id):

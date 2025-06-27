@@ -44,12 +44,12 @@
                             <p class="mb-1">Price: ₹{{ item.product.price|floatformat:2 }}</p>
                             <p class="mb-1">Subtotal: ₹{{ entry.subtotal|floatformat:2 }}</p>
                             <div class="d-flex align-items-center gap-2">
-                                <form method="POST" action="{% url 'decrement_cart' item.product.id %}">
+                                <form method="POST" action="{% url 'decrement_cart' item.id %}">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-sm btn-outline-secondary" {% if item.quantity <= 1 %}disabled{% endif %}>-</button>
                                 </form>
                                 <span class="quantity-display">{{ item.quantity }}</span>
-                                <form method="POST" action="{% url 'increment_cart' item.product.id %}">
+                                <form method="POST" action="{% url 'increment_cart' item.id %}">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-sm btn-outline-secondary">+</button>
                                 </form>
