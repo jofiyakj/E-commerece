@@ -8,105 +8,131 @@
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-      a {
-    text-decoration: none;
-    color: inherit;
+/* ----- Anchor Tags ----- */
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.3s ease;
 }
 
-   .section-title {
-      font-weight: 700;
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      text-align: center;
-      color: #212529;
-    }
-      .search-container {
-        position: relative;
-        width: 300px; /* Adjust as needed */
-      }
+/* ----- Section Titles ----- */
+.section-title {
+  font-weight: 700;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #212529;
+}
 
-    #search-input {
-        width: 100%;
-        padding: 8px;
-        box-sizing: border-box;
-    }
+/* ----- Search Bar ----- */
+.search-container {
+  position: relative;
+  width: 300px;
+}
 
-    .dropdown {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: rgb(247, 155, 174);
-        border: 1px solid #ccc;
-        border-top: none;
-        max-height: 150px;
-        overflow-y: auto;
-        z-index: 999;
-        display: none;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
+#search-input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
 
-    .dropdown li {
-        padding: 8px 10px;
-        cursor: pointer;
-    }
+/* ----- Dropdown for Search History ----- */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgb(247, 155, 174);
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 999;
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
 
-    .dropdown li:hover {
-        background-color: #f0f0f0;
-    }
+.dropdown li {
+  padding: 8px 10px;
+  cursor: pointer;
+}
 
+.dropdown li:hover {
+  background-color: #f0f0f0;
+}
 
-    .products {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 20px;
-        padding: 20px;
-    }
+/* ----- Product Grid Container ----- */
+.products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
 
-    .product-link {
-        text-decoration: none;
-        color: inherit;
-    }
+/* ----- Individual Product Card ----- */
+.product-link {
+  text-decoration: none;
+  color: inherit;
+}
 
-    .product {
-        width: 100%;
-        height: 320px;
-        border: 1px solid #ddd;
-        padding: 10px;
-        box-sizing: border-box;
-        text-align: center;
-        background-color: #fff;
-        border-radius: 8px;
-        transition: transform 0.2s ease;
-    }
+.product {
+  width: 100%;
+  height: 320px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  box-sizing: border-box;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-    .product:hover {
-        transform: scale(1.03);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
+.product:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
 
-    .product img {
-        width: 100%;
-        height: 150px;
-        object-fit: cover;
-        border-radius: 4px;
-        margin-bottom: 10px;
-    }
+/* ----- Product Image ----- */
+.product img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
 
-    .product h2 {
-        font-size: 1.1em;
-        margin: 10px 0 5px;
-    }
+/* ----- Product Title & Price ----- */
+.product h2 {
+  font-size: 1.1em;
+  margin: 10px 0 5px;
+}
 
-    .product p {
-        font-size: 1em;
-        color: #555;
-    } 
+.product p {
+  font-size: 1em;
+  color: #555;
+}
+@media (max-width: 768px) {
+  .products {
+    grid-template-columns: 1fr 1fr;
+  }
+  .search-container {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .products {
+    grid-template-columns: 1fr;
+  }
+}
+
   
   </style>
-    </style>
+    
 </head>
 <body>
   <header class="navbar">
@@ -147,21 +173,21 @@
   </div>
   <div class="carousel-inner">
     <div class="carousel-item active">
-      <img src="{% static 'images/screen.jpg' %}" class="d-block w-100" alt="Skincare Product Banner 1" style="max-height: 500px; object-fit: cover;">
+      <img src="{% static 'images/additional_image1.jpg' %}">
       <div class="carousel-caption d-none d-md-block">
         <h2 class="text-light fw-bold">Glow Naturally</h2>
         <p>Discover the perfect skincare for your skin type</p>
       </div>
     </div>
     <div class="carousel-item">
-      <img src="{% static 'images/kkk.jpg' %}" class="d-block w-100" alt="Skincare Product Banner 2" style="max-height: 500px; object-fit: cover;">
+      <img src="{% static 'images/additional_image2.jpg' %}">
       <div class="carousel-caption d-none d-md-block">
         <h2 class="text-light fw-bold">Hydration That Lasts</h2>
         <p>Shop moisturizers that keep your skin glowing all day</p>
       </div>
     </div>
     <div class="carousel-item">
-      <img src="{% static 'images/jj.jpg' %}" class="d-block w-100" alt="Skincare Product Banner 3" style="max-height: 500px; object-fit: cover;">
+      <img src="{% static 'images/additional_image3.jpg' %}" >
       <div class="carousel-caption d-none d-md-block">
         <h2 class="text-light fw-bold">Natural Ingredients</h2>
         <p>Safe, effective, and cruelty-free skincare you’ll love</p>
@@ -176,14 +202,14 @@
   </button>
 </div>
 
-<!-- {% if products %}
-  <div class="products"> -->
+{% if products %}
+  <div class="products">
      <section class="products-container container my-5">
     <h2 class="section-title">Featured Products</h2>
     <div class="text-center mb-4">
       <a href="{% url 'product_list' %}" class="btn btn-outline-primary">Show more »</a>
-    </div>
-    
+    </div> 
+     
     {% for product in products %}
       <div class="product">
         <a href="{% url 'product_detail' product.id  %}" class="product-link">

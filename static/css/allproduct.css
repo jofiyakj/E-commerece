@@ -1,0 +1,143 @@
+/* body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar {
+  background-color: #2c3e50 !important;
+  padding: 15px 20px;
+}
+
+.navbar .navbar-brand,
+.navbar .nav-links a,
+.navbar .btn {
+  color: white !important;
+}
+
+.navbar .btn {
+  background-color: #5a5a5a;
+  border: none;
+}
+
+.navbar .btn:hover {
+  background-color: #444;
+}
+
+.navbar .form-control {
+  width: 280px;
+  max-width: 100%;
+}
+
+.menu-toggle {
+  font-size: 1.5rem;
+  color: white;
+  background: none;
+  border: none;
+}
+
+.nav-links {
+  display: none;
+  flex-direction: column;
+  gap: 0.5rem;
+  background-color: #34495e;
+  padding: 1rem;
+  border-radius: 5px;
+}
+
+.nav-links.show {
+  display: flex;
+}
+
+@media (min-width: 992px) {
+  .nav-links {
+    display: flex !important;
+    background: none;
+    padding: 0;
+    flex-direction: row;
+  }
+}
+
+.container form {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.products-container {
+  padding: 40px 0;
+}
+
+.card {
+  border: none;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease;
+  background-color: #ffffff;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: contain;
+  padding: 10px;
+  background-color: #fff;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.card-text {
+  color: #555;
+}
+
+.card del {
+  color: #999;
+}
+
+.card strong {
+  color: #e53935;
+}
+
+.card .btn {
+  background-color: #e3f2fd;
+  color: #007bff;
+  border: none;
+  padding: 6px 12px;
+  font-size: 1rem;
+}
+
+.card .btn:hover {
+  background-color: #bbdefb;
+}
+
+footer {
+  background-color: #2c3e50;
+  color: white;
+  padding: 20px 0;
+  font-size: 0.875rem;
+}
+
+footer h5 {
+  font-size: 1.1rem;
+}
+
+footer .text-white {
+  color: white !important;
+}
+
+footer .list-unstyled li a {
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+footer .list-unstyled li a:hover {
+  text-decoration: underline;
+} */
