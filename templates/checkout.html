@@ -101,7 +101,7 @@
                                     <button type="submit" name="action" value="increase" class="btn btn-outline-secondary btn-sm">+</button>
                                 </form>
                             </div>
-                            <form method="POST" action="{% url 'remove_from_cart' item.product.id %}">
+                            <form method="POST" action="{% url 'remove_from_cart' item.id %}">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-danger btn-sm">Remove</button>
                             </form>

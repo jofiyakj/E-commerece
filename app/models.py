@@ -112,7 +112,7 @@ class Order(models.Model):
     phone = models.CharField(max_length=15)
     pincode = models.CharField(max_length=10)
     address = models.TextField()
-    address_type = models.CharField(max_length=10)
+    # address_type = models.CharField(max_length=10)
     payment_method = models.CharField(max_length=20)
     total_price = models.FloatField()
     razorpay_payment_id = models.CharField(max_length=100, blank=True)

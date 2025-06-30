@@ -737,7 +737,7 @@ def checkout(request):
 
     if total_price <= 0:
         messages.error(request, "Invalid cart total. Please check your cart and try again.")
-        return redirect('cart')
+        # return redirect('cart')
 
     razorpay_order = None
     if total_price > 0:
@@ -749,27 +749,27 @@ def checkout(request):
             })
         except BadRequestError:
             messages.error(request, "Invalid request to payment gateway. Please try again later.")
-            return redirect('cart')
+            # return redirect('cart')
         except ServerError:
             messages.error(request, "Payment gateway server error. Please try again later.")
-            return redirect('cart')
+            # return redirect('cart')
         except GatewayError:
             messages.error(request, "Payment gateway error. Please try again later.")
-            return redirect('cart')
+            # return redirect('cart')
         except Exception:
             messages.error(request, "An unexpected error occurred. Please try again later.")
-            return redirect('cart')
+            # return redirect('cart')
 
-    context = {
-        'cart_items': cart_items,
-        'items_total': cart_items.count(),
-        'total_price': total_price,
-        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
-        'razorpay_amount': total_price,
-        'razorpay_order_id': razorpay_order['id'] if razorpay_order else '',
-        'delivery_date': timezone.now() + timezone.timedelta(days=5),
-        'addresses': addresses,
-    }
+        context = {
+            'cart_items': cart_items,
+            'items_total': cart_items.count(),
+            'total_price': total_price,
+            'razorpay_key_id': settings.RAZORPAY_KEY_ID,
+            'razorpay_amount': total_price,
+            'razorpay_order_id': razorpay_order['id'] if razorpay_order else '',
+            'delivery_date': timezone.now() + timezone.timedelta(days=5),
+            'addresses': addresses,
+        }
     return render(request, 'checkout.html', context)
 
 @csrf_exempt
@@ -809,7 +809,7 @@ def process_checkout(request):
             phone=selected_address.phone,
             pincode=selected_address.pincode,
             address=selected_address.address,
-            address_type='Home' if selected_address.is_default else 'Other',
+            # address_type='Home' if selected_address.is_default else 'Other',
             payment_method=payment_method,
             total_price=total_price,
             razorpay_payment_id=razorpay_payment_id if payment_method == 'razorpay' else '',

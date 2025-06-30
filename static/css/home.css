@@ -41,6 +41,7 @@ a {
   margin-left: 20px;
   color: white;
   font-weight: 500;
+  text-decoration: none;
 }
 
 .nav-links a:hover {
@@ -106,11 +107,7 @@ a {
   padding: 0 20px;
 }
 
-.products {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 24px;
-}
+
 
 /* Product Card */
 .product {
@@ -202,17 +199,18 @@ a {
     position: relative;
     border-radius: 20px;
     width: 200%;
-    height: 100%;
+    height:100%;
     transition: 1s;
     overflow: hidden;
     background-color: rgba(255, 255, 255, 0.7);
 }
 
 .carousel-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width:90%;
+    height: 300px;
+    /* object-fit: cover; */
     border-radius: 20px;
+    margin-left: 5%;
 }
 
  .carousel-item img:hover {
