@@ -17,7 +17,7 @@ import re
 import random
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from datetime import datetime, timedelta
+from datetime import  timedelta
 from django.utils import timezone
 import razorpay
 from django.conf import settings
@@ -46,7 +46,7 @@ def home(request):
     if query:
         exact_matches = Product.objects.filter(name__iexact=query)
         if exact_matches.count() == 1:
-            return redirect('product_detail', product_id=exact_matches.first().id)
+            return redirect('product_detail', id=exact_matches.first().id)
         products = Product.objects.filter(name__icontains=query)
     else:
         products = Product.objects.all().order_by('-id')[:8]
@@ -239,61 +239,6 @@ def search_results(request):
 
 
 
-# def register_view(request):
-#     if request.method == 'POST':
-#         username = request.POST.get('username', '').strip()
-#         email = request.POST.get('email', '').strip()
-#         password = request.POST.get('password', '')
-#         confpassword = request.POST.get('confpassword', '')
-
-#         # Basic validation
-#         if not username or not email or not password or not confpassword:
-#             messages.error(request, "All fields are required.")
-#             return redirect('register')
-
-#         if password != confpassword:
-#             messages.error(request, "Passwords do not match.")
-#             return redirect('register')
-
-#         try:
-#             validate_email(email)
-#         except ValidationError:
-#             messages.error(request, "Invalid email format.")
-#             return redirect('register')
-
-#         if User.objects.filter(username=username).exists():
-#             messages.error(request, "Username already exists.")
-#             return redirect('register')
-
-#         if User.objects.filter(email=email).exists():
-#             messages.error(request, "Email already in use.")
-#             return redirect('register')
-
-#         if not is_valid_password(password):
-#             messages.error(
-#                 request,
-#                 "Password must be at least 8 characters long, contain an uppercase letter, a number, and a special character."
-#             )
-#             return redirect('register')
-
-#         # Create user and profile
-#         user = User.objects.create_user(username=username, email=email, password=password)
-#         user.save()
-
-#         user_profile = users.objects.create(user=user)
-
-#         # Safely generate and assign vector data
-#         user_vector = combine_user_with_search_and_views(user_profile)
-#         user_profile.vector_data = json.dumps(user_vector.tolist())
-#         user_profile.save()
-
-#         messages.success(request, "Registration successful. Please login.")
-#         return redirect('login')
-
-#     # Clear messages for GET request
-#     messages.get_messages(request).used = True
-#     return render(request, 'register.html')
-
 def register_view(request):
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
@@ -431,7 +376,7 @@ def reset_password(request):
 
 def first_page(request):
     products = Product.objects.all()
-    return render(request, 'firstpage.html', {'products': products})
+    return render(request, 'home.html', {'products': products})
 
 def delete_g(request, id):
     get_object_or_404(Product, pk=id).delete()
@@ -602,20 +547,21 @@ def add_to_cart(request, product_id):
             return redirect('product_detail', id=product_id)
 
         if not created:
-            cart_item.quantity = quantity
-        
-            if cart_item.quantity + quantity > product.stock:
+            # Total quantity must not exceed available stock
+            total_quantity = cart_item.quantity + quantity
+            if total_quantity > product.stock:
                 messages.error(request, f"Adding this quantity exceeds stock. Only {product.stock} item(s) available.", extra_tags='stock')
                 return redirect('product_detail', id=product_id)
-            cart_item.quantity += quantity
+            cart_item.quantity = total_quantity
         else:
-             cart_item.quantity=quantity
+            cart_item.quantity = quantity
+
         cart_item.save()
         messages.success(request, f"{quantity} item(s) added to cart.", extra_tags='stock')
         return redirect('cart')
 
-    # Add a fallback return (in case it's a GET request or something goes wrong)
     return redirect('product_detail', id=product_id)
+
 
 @login_required(login_url='login')
 def increment_cart(request, id):
@@ -809,7 +755,7 @@ def process_checkout(request):
             phone=selected_address.phone,
             pincode=selected_address.pincode,
             address=selected_address.address,
-            # address_type='Home' if selected_address.is_default else 'Other',
+            address_type='Home' if selected_address.is_default else 'Other',
             payment_method=payment_method,
             total_price=total_price,
             razorpay_payment_id=razorpay_payment_id if payment_method == 'razorpay' else '',
@@ -993,21 +939,30 @@ def delete_user(request, user_id):
 
 #NEW SINGLE ORDER VIEW
 @login_required
+
+
 def profile_view(request):
     addresses = Address.objects.filter(user=request.user)
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
 
-    # Calculate delivery date and return eligibility for each order
     for order in orders:
-        order.delivery_date = order.created_at + timedelta(days=5)
-        # Check if order is within 7 days for return eligibility
-        order.can_return = (order.status == 'Delivered' and 
-                           (timezone.now() - order.created_at).days < 7)
+        if order.created_at:
+            order.delivery_date = order.created_at + timedelta(days=5)
+            order.can_return = (
+                order.status == 'Delivered' and 
+                (timezone.now() - order.created_at).days < 7
+            )
+        else:
+            order.delivery_date = None
+            order.can_return = False
 
     editing_address = False
     address_to_edit = None
     name = phone = pincode = address = ''
     errors = {}
+    
+    # Continue rendering context or template
+
 
     # Check if editing an address
     address_id = request.GET.get('edit')

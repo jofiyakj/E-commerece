@@ -165,6 +165,7 @@
         </div>
         {% endif %}
     </div>
+</div>
      {% if messages %}
             <ul class="messages">
                 {% for message in messages %}
@@ -172,37 +173,8 @@
                 {% endfor %}
             </ul>
             {% endif %}
+</div>
 
-  <footer class="mt-auto py-4">
-    <div class="container">
-        <div class="row text-center text-md-start">
-            <div class="col-md-3"><h5>GlowCare</h5><p>Glow naturally. Glow confidently.</p></div>
-            <div class="col-md-3">
-                <h6>Quick Links</h6>
-                <ul class="list-unstyled">
-                    <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'contact' %}">Contact</a></li>
-                    <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
-                    <li><a href="{% url 'terms' %}">Terms</a></li>
-                </ul>
-            </div>
-            <div class="col-md-3">
-                <h6>Support</h6>
-                <p>Email: support@glowcare.com</p>
-                <p>Phone: +91-98765-43210</p>
-            </div>
-            <div class="col-md-3">
-                <h6>Follow Us</h6>
-                <a href="#">Instagram</a><br>
-                <a href="#">Facebook</a><br>
-                <a href="#">Twitter</a>
-            </div>
-        </div>
-        <div class="text-center mt-3">
-            <p>© 2025 GlowCare | All Rights Reserved</p>
-        </div>
-    </div>
-</footer>
 </div>
 <script>
 function payNow() {

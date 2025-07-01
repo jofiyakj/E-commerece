@@ -8,6 +8,62 @@
     <link rel="stylesheet" href="{% static 'css/profile.css' %}" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
+        
+        a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.3s ease;
+}
+
+/* ----- Section Titles ----- */
+.section-title {
+  font-weight: 700;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #212529;
+}
+
+/* ----- Search Bar ----- */
+.search-container {
+  position: relative;
+  width: 300px;
+}
+
+#search-input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* ----- Dropdown for Search History ----- */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgb(247, 155, 174);
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 999;
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dropdown li {
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.dropdown li:hover {
+  background-color: #f0f0f0;
+}
         html, body {
             height: 100%;
             margin: 0;
@@ -17,7 +73,7 @@
             background-color: #fff8f6;
         }
         body { padding-top: 80px; }
-        .navbar { position: fixed; top: 0; width: 100%; z-index: 1000; }
+        /* .navbar { position: fixed; top: 0; width: 100%; z-index: 1000; } */
 
         .main-content { flex: 1; padding-bottom: 40px; }
         .sidebar {
@@ -35,23 +91,36 @@
             background-color: #fff0ec;
             border-radius: 5px;
         }
-        .profile-card, .address-card, .order-card, .stats-card {
+        .profile-card, .address-card, .order-card, .status-card {
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             padding: 20px;
             margin-bottom: 20px;
         }
-        .profile-pic {
+        /* .profile-pic {
             width: 100px; height: 100px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid #e07a5f;
+        } */
+          .status-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            text-align: center;
+        }
+
+        .address-card .btn,
+        .order-card .btn {
+            font-size: 14px;
         }
         .tracking-bar {
             display: flex; justify-content: space-between;
             background-color: #fef1ef;
             padding: 10px; border-radius: 6px; margin-top: 10px;
+            align-items: center;
         }
         .tracking-step {
             text-align: center;
@@ -71,8 +140,17 @@
         footer a:hover { text-decoration: underline; }
 
         @media (max-width: 768px) {
-            .sidebar { min-height: auto; border-bottom: 1px solid #dee2e6; }
+            .sidebar { min-height: auto; border-bottom: 1px solid #dee2e6; border-right: none; border-right: none;}
             .tracking-bar { flex-direction: column; gap: 10px; }
+            .profile-card,
+            .address-card,
+            .order-card {
+                padding: 15px;
+            }
+
+            .status-card {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -86,19 +164,22 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
-            <form class="d-flex me-auto" method="GET" action="{% url 'search_results' %}">
-                <input class="form-control me-2" type="text" name="q" placeholder="Search skincare..." required>
-                <button class="btn btn-outline-danger" type="submit">Search</button>
-            </form>
+          <form class="search-bar d-flex align-items-start gap-2" method="GET" action="{% url 'home' %}" onsubmit="saveSearchQuery()">
+    <div class="search-container position-relative">
+        <input type="text" class="form-control" id="search-input" name="query" placeholder="Search Products..." autocomplete="off" required oninput="filterDropdown()" onfocus="showDropdown()">
+        <ul id="search-history-dropdown" class="dropdown"></ul>
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
             <ul class="navbar-nav ms-3 gap-2">
-                <li class="nav-item"><a  href="{% url 'home' %}">Home</a></li>
-                <li class="nav-item"><a href="{% url 'product_list' %}">All product</a></li>
-                <li class="nav-item"><a  href="{% url 'cart' %}">Cart</a></li>
-                <li class="nav-item"><a href="{% url 'profile' %}">Profile</a></li>
+                <a  href="{% url 'home' %}">Home</a></li>
+                <a href="{% url 'product_list' %}">All product</a></li>
+                <a  href="{% url 'cart' %}">Cart</a></li>
+                 <a href="{% url 'profile' %}">Profile</a></li>
                 {% if user.is_authenticated %}
-                    <li class="nav-item"><a  href="{% url 'logout' %}">Logout</a></li>
+                <a  href="{% url 'logout' %}">Logout</a></li>
                 {% else %}
-                    <li class="nav-item"><a href="{% url 'login' %}">Login</a></li>
+                <a href="{% url 'login' %}">Login</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -111,63 +192,188 @@
         <!-- Sidebar -->
         <div class="col-md-3">
             <div class="sidebar">
-                <h4>My GlowCare</h4>
+                <h4>My Account</h4>
                 <ul class="nav flex-column">
                     <li class="nav-item"><a class="nav-link active" href="{% url 'profile' %}">Profile</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#addresses">Addresses</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#orders">Orders</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Addresses</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Orders</a></li>
                 </ul>
             </div>
         </div>
 
-        <!-- Main Profile -->
-        <div class="col-md-9">
-            <!-- Profile Info -->
-            <div class="profile-card">
-                <div class="d-flex align-items-center mb-4">
-                    <img src="{% if user.profile_pic %}{{ user.profile_pic.url }}{% else %}{% static 'images/noprofile.png' %}{% endif %}" alt="Profile" class="profile-pic me-3">
-                    <div>
-                        <h4>{{ user.username }}
-                            <a href="{% url 'edit_username' %}" class="btn btn-sm btn-outline-danger ms-2">Edit</a>
-                        </h4>
-                        <p class="text-muted">{{ user.email }}
-                            <a href="{% url 'edit_email' %}" class="btn btn-sm btn-outline-danger ms-2">Edit</a>
-                        </p>
+            <!-- Main Profile Content -->
+            <div class="col-md-9">
+                <!-- Profile Info -->
+                <div class="profile-card">
+                    <div class="d-flex align-items-center mb-4">
+                        <!-- <img src="{% if user.profile_pic|default_if_none:'' %}{{ user.profile_pic.url }}{% else %}{% static 'images/noprofile.png' %}{% endif %}" -->
+                            <!-- alt="Profile Picture" class="profile-pic me-3"> -->
+                        <div> 
+                            <h3>{{ user.username|default:"User" }}
+                                <a href="{% url 'edit_username' %}" class="btn btn-outline-primary btn-sm ms-2">Edit Username</a>
+                            </h3>
+                            <p class="text-muted">{{ user.email|default:"No email provided" }}
+                                <a href="{% url 'edit_email' %}" class="btn btn-outline-primary btn-sm ms-2">Edit Email</a>
+                            </p>
+                        </div>
+                    </div>
+                    <!-- Account Stats -->
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <h6>Orders Placed</h6>
+                                <p class="h4">{{ orders|length|default:0 }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <h6>Saved Addresses</h6>
+                                <p class="h4">{{ addresses|length|default:0 }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stats-card">
+                                <h6>Last Order</h6>
+                                <p class="h4">{% if orders %}{{ orders.0.created_at|date:"M d, Y"|default:"N/A" }}{% else %}N/A{% endif %}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="row g-3">
-                    <div class="col-md-4 stats-card">
-                        <h6>Orders</h6>
-                        <p class="h5">{{ orders|length }}</p>
+
+                <!-- Address Management -->
+                <div class="address-card" id="addresses">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>Saved Addresses</h4>
+                        <a href="{% url 'add_address' %}" class="btn btn-success btn-sm">Add New Address</a>
                     </div>
-                    <div class="col-md-4 stats-card">
-                        <h6>Addresses</h6>
-                        <p class="h5">{{ addresses|length }}</p>
+                    {% if editing_address and address_to_edit %}
+                    <h5>{{ action|default:"Edit" }} Address</h5>
+                    <form method="POST" action="{% url 'edit_address' address_to_edit.id %}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Name</label>
+                                <input type="text" name="name" class="form-control" value="{{ name|default:'' }}">
+                                {% if errors.name %}<div class="text-danger">{{ errors.name }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="text" name="phone" class="form-control" value="{{ phone|default:'' }}">
+                                {% if errors.phone %}<div class="text-danger">{{ errors.phone }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Pincode</label>
+                                <input type="text" name="pincode" class="form-control" value="{{ pincode|default:'' }}">
+                                {% if errors.pincode %}<div class="text-danger">{{ errors.pincode }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Address</label>
+                                <textarea name="address" class="form-control">{{ address|default:'' }}</textarea>
+                                {% if errors.address %}<div class="text-danger">{{ errors.address }}</div>{% endif %}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a href="{% url 'profile' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                    {% else %}
+                    {% if addresses %}
+                    <div class="row">
+                        {% for addr in addresses %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>{{ addr.name|default:"Unnamed" }}</h6>
+                                    <p class="text-muted">
+                                        {{ addr.address|default:"No address provided" }}<br>
+                                        Pincode: {{ addr.pincode|default:"N/A" }}<br>
+                                        Phone: {{ addr.phone|default:"N/A" }}
+                                    </p>
+                                    <a href="{% url 'edit_address' addr.id %}" class="btn btn-outline-primary btn-sm me-2">Edit</a>
+                                    <a href="{% url 'delete_address' addr.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
-                    <div class="col-md-4 stats-card">
-                        <h6>Last Order</h6>
-                        <p class="h5">{% if orders %}{{ orders.0.created_at|date:"M d, Y" }}{% else %}N/A{% endif %}</p>
+                    {% else %}
+                    <p class="text-muted">No addresses saved yet.</p>
+                    {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- Order History -->
+                <div class="order-card" id="orders">
+                    <h4>Recent Orders</h4>
+                    {% for order in orders %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                {% if order.items.all %}
+                                {% for item in order.items.all %}
+                                <div class="col-md-4 d-flex align-items-center mb-2">
+                                    <img src="{% if item.product.image.url|default_if_none:'' %}{{ item.product.image.url }}{% else %}https://via.placeholder.com/60{% endif %}"
+                                        alt="{{ item.product.name|default:'Product' }}" class="img-thumbnail me-3"
+                                        style="width: 60px; height: 60px;">
+                                    <div>
+                                        <h6>{{ item.product.name|default:"Unnamed Product" }}</h6>
+                                        <p class="text-muted mb-0">Price: ₹{% if item.product.offerprice|default_if_none:'' %}{{ item.product.offerprice }}{% else %}{{ item.product.price|default:0 }}{% endif %}</p>
+                                        <p class="text-muted mb-0">Quantity: {{ item.quantity|default:0 }}</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% else %}
+                                <div class="col-md-4">
+                                    <p class="text-muted">No items in this order.</p>
+                                </div>
+                                {% endif %}
+                                <div class="col-md-4">
+                                    <p class="mb-1"><strong>Status:</strong> {{ order.status|default:"N/A" }}</p>
+                                    <p class="mb-1"><strong>Total:</strong> ₹{{ order.total_price|default:0 }}</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <p class="text-muted mb-1">Order Date: {{ order.created_at|date:"D, M d, Y"|default:"N/A" }}</p>
+                                    <p class="text-muted mb-1">Est. Delivery: {{ order.delivery_date|date:"D, M d, Y"|default:"N/A" }}</p>
+                                    {% if order.can_return %}
+                                    <form method="POST" action="{% url 'return_order' order.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-warning btn-sm"
+                                            onclick="return confirm('Are you sure you want to return this order?');">Return Product</button>
+                                    </form>
+                                    {% elif order.status in 'Ordered,Confirmed,Shipped' %}
+                                    <form method="POST" action="{% url 'cancel_order' order.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Are you sure you want to cancel this order?');">Cancel Order</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- Tracking Bar -->
+                            <div class="tracking-bar">
+                                {% for status, display in order.STATUS_CHOICES %}
+                                {% if status != 'Cancelled' and status != 'Returned' %}
+                                <div class="tracking-step {% if order.status == status %}completed{% else %}pending{% endif %}">
+                                    {{ display }}
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
+                    {% empty %}
+                    <p class="text-muted">You have not placed any orders yet.</p>
+                    {% endfor %}
                 </div>
             </div>
-
-            <!-- Addresses -->
-            {% include 'user/address_section.html' %}
-
-            <!-- Orders -->
-            {% include 'user/order_section.html' %}
         </div>
     </div>
-</div>
-
-<!-- Messages -->
-{% if messages %}
-<div class="container">
-    {% for message in messages %}
-    <div class="alert alert-info">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
+     {% if messages %}
+        <div class="message-container">
+            {% for message in messages %}
+            <p class="message">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
 
 <!-- Footer -->
 <footer class="mt-auto py-4">
