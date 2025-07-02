@@ -345,6 +345,62 @@ a {
     font-size: 0.9rem;
   }
 }
+/* ===== Price Container ===== */
+.card-text {
+  font-size: 1rem;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ===== Original Price (Struck through) ===== */
+.card-text del {
+  color: #999;
+  font-size: 0.95rem;
+}
+
+/* ===== Offer Price ===== */
+.card-text strong.text-danger {
+  color: #e85c75; /* Soft red-pink for skincare feel */
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* ===== Regular Price when no discount ===== */
+.card-text strong.text-dark {
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* ===== Responsive Adjustments ===== */
+@media (max-width: 768px) {
+  .card-text {
+    font-size: 0.95rem;
+  }
+
+  .card-text del {
+    font-size: 0.9rem;
+  }
+
+  .card-text strong {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-text {
+    font-size: 0.9rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .card-text del,
+  .card-text strong {
+    font-size: 0.95rem;
+  }
+}
 
 
 /* ===== Footer ===== */

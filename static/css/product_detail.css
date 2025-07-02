@@ -188,6 +188,39 @@ main.container {
   color: #ffffff;
   cursor: not-allowed;
 }
+.price {
+  font-size: 1.5rem;
+  margin-top: 20px;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.offer-price {
+  color: #f07c9c; /* Skincare pink */
+  font-weight: 600;
+  font-size: 1.4rem;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #a0a0a0;
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .price {
+    font-size: 1.2rem;
+  }
+  .offer-price {
+    font-size: 1.3rem;
+  }
+  .original-price {
+    font-size: 1rem;
+  }
+}
+
 
 /* ----- Responsive Adjustments ----- */
 @media (max-width: 768px) {
